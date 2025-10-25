@@ -9,6 +9,8 @@ def print_and_calc(name, df, num_bins):
     print(df)
     counts, bin_edges, _ = plt.hist(df["mass_g"], bins=num_bins)
     plt.title(f"{name} original distribution")
+    plt.xlabel("Mass(g)")
+    plt.ylabel("Count")
     plt.show()
     plt.cla()
     print("Bin counts:", counts)
@@ -64,16 +66,22 @@ def main():
     
     plt.hist(low_test["mass_g"], bins=num_bins)
     plt.title("Low test distribution")
+    plt.xlabel("Mass(g)")
+    plt.ylabel("Count")
     plt.show()
     plt.cla()
     
     plt.hist(mid_test["mass_g"], bins=num_bins)
     plt.title("Mid test distribution")
+    plt.xlabel("Mass(g)")
+    plt.ylabel("Count")
     plt.show()
     plt.cla()
     
     plt.hist(high_test["mass_g"], bins=num_bins)
     plt.title("High test distribution")
+    plt.xlabel("Mass(g)")
+    plt.ylabel("Count")
     plt.show()
     plt.cla()
     
