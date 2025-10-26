@@ -81,7 +81,7 @@ def main():
     plt.ylabel("Count")
 
     plt.savefig("../web_dev/mid_test.png")
-    
+
     plt.show()
     plt.cla()
     
