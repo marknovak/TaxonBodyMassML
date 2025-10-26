@@ -22,11 +22,26 @@ ul li a:hover {
   background-color: #111111;
 }
 
+#mainBox {
+
+}
+
+#inputBox {
+	border: 2px solid black;
+	position: fixed;
+	top: 30%;
+	left: 25%;
+	width: 22.5%;
+}
 
 #outputBox {
 	float: left;
 	border: 2px solid black;;
+	position: fixed;
+	top: 50%;
+	left: 25%;
 }
+
 
 #massOutput {
         float: left;
@@ -41,7 +56,17 @@ ul li a:hover {
 #explanantionModal {
         float: right;
         border: 2px solid black;
+	height: 70%;
 	width: 30%;
+	position: fixed;
+	top: 20%;
+	right: 5%;
+}
+
+#notes {
+	position: fixed;
+	bottom: 0;
+	font-size: 12px;
 }
 
 img {
