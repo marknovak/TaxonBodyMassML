@@ -41,7 +41,7 @@ def separate_test_train(df_bins, test_train_split_proportion):
     
     
 def main():
-    df = pd.read_csv("./data/BodyMass.csv")
+    df = pd.read_csv("../data/BodyMass.csv")
     low_bound = 1
     high_bound = 10000
     num_bins = 30
@@ -64,16 +64,20 @@ def main():
     
     plt.hist(low_test["mass_g"], bins=num_bins)
     plt.title("Low test distribution")
+    #I saved pngs of your histograms to display on the website -Hailey
+    plt.savefig("../web_dev/low_test.png")
     plt.show()
     plt.cla()
     
     plt.hist(mid_test["mass_g"], bins=num_bins)
     plt.title("Mid test distribution")
+    plt.savefig("../web_dev/mid_test.png")
     plt.show()
     plt.cla()
     
     plt.hist(high_test["mass_g"], bins=num_bins)
     plt.title("High test distribution")
+    plt.savefig("../web_dev/high_test.png")
     plt.show()
     plt.cla()
     
