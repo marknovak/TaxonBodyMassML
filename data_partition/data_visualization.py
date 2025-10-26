@@ -43,7 +43,7 @@ def separate_test_train(df_bins, test_train_split_proportion):
     
     
 def main():
-    df = pd.read_csv("../data/BodyMass.csv")
+    df = pd.read_csv("./data/BodyMass.csv")
     low_bound = 1
     high_bound = 10000
     num_bins = 30
@@ -70,7 +70,7 @@ def main():
     plt.ylabel("Count")
 
     #I saved pngs of your histograms to display on the website -Hailey
-    plt.savefig("../web_dev/low_test.png")
+    plt.savefig("./web_dev/low_test.png")
 
     plt.show()
     plt.cla()
@@ -80,7 +80,7 @@ def main():
     plt.xlabel("Mass(g)")
     plt.ylabel("Count")
 
-    plt.savefig("../web_dev/mid_test.png")
+    plt.savefig("./web_dev/mid_test.png")
 
     plt.show()
     plt.cla()
@@ -90,7 +90,7 @@ def main():
     plt.xlabel("Mass(g)")
     plt.ylabel("Count")
 
-    plt.savefig("../web_dev/high_test.png")
+    plt.savefig("./web_dev/high_test.png")
 
     plt.show()
     plt.cla()
