@@ -18,11 +18,11 @@ Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch nam
 
 Explain how to file issues, required templates/labels, estimation, and triage/assignment practices.
 
+We will use GitHub Issues
+
 ## Commit Messages
 
-State the convention (e.g., Conventional Commits), include examples, and how to reference issues.
-
-We will use Conventional Commits, which follow the template: <type>(<scope>): <description>
+We will use Conventional Commits, which follow the template: type(scope): description
 
 Examples:
 - docs(contributing): completed the commit messages section in contributing.md
@@ -46,6 +46,8 @@ Outline PR requirements (template, checklist, size limits), reviewer expectation
 ## CI/CD
 
 Link to pipeline definitions, list mandatory jobs, how to view logs/re-run jobs, and what must pass before merge/release.
+
+Located in ./github/workflows and triggers after every push or PR to the main branch
 
 ## Security & Secrets
 
