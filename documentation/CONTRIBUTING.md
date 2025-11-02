@@ -22,6 +22,15 @@ Explain how to file issues, required templates/labels, estimation, and triage/as
 
 State the convention (e.g., Conventional Commits), include examples, and how to reference issues.
 
+We will use Conventional Commits, which follow the template: <type>(<scope>): <description>
+
+Examples:
+- docs(contributing): completed the commit messages section in contributing.md
+- feat(data): log transformed the species mass data
+- feat(ui): included histograms on data visualization tab
+
+Reference issues by including either "Fixes #xyz" or "Refs #xyz" at the end of a commit.
+
 ## Code Style, Linting & Formatting
 
 Name the formatter/linter, config file locations, and the exact commands to check/fix locally.
