@@ -6,45 +6,59 @@
 	</head>
 	<body>
 		<ul id="navBar">
-			 <li><a href="./index.html">Design Plan</a></li>
- 			 <li><a href="./data_visualization.html">Data Visualization</a></li>
- 
+			<li><a href="./index.html">Design Plan</a></li>
+ 			<li><a href="./data_visualization.html">Data Visualization</a></li>
+			<li><a href="./citations.html">Citations</a></li>
+			<li id="onRight"><a href="./help_page.html">Help</a></li>
 		</ul>
 
-		<div id = "mainBox">
-			<div id = "inputBox">
-				<div id = "inputBar">
-                        		<p>Input Bar</p>
-               			</div>
-				<div id = "singleOrList">
-					<p>Single or List Toggle?</p>
-				</div>
+		<div id = "inputBox">
+			<div id = "inputBar">
+                        	<p>Input Bar</p>
+               		</div>
+			<div id = "singleOrList">
+				<button id = "singleButton">Single</button>
+				<button id = "listButton">List</button>
+			</div>
 
-			</div>	
-			<div id = "outputBox">
-                       		 <p>Output Box</p>
+			<div id = "csvCheck" class = "hidden">
+				<p>Convert output to .csv file?</p>
+				<p>note: any input with more than x species will be automatically converted to a .csv file</p>
+			</div>
 
-				 <div id = "massOutput">
-		                        <p>Mass Output</p>
-                		 </div>
+			<div id = "goButton">
+				<p>Go!</p>
+			</div>
 
-			         <div id = "confidenceOutput">
-                       		        <p>Confidence Output</p>
-               			 </div>
+		</div>	
+		
+		<div id = "outputBox" class ="hidden">
+                	<p>Output Box</p>
 
-    	                </div>
+			<div id = "massOutput">
+		        	<p>Mass Output</p>
+                		</div>
 
-                </div>
+			<div id = "confidenceOutput">
+                       		<p>Confidence Output</p>
+               		</div>
 
+			<div id="learnMoreArrow" class = "hidden">
+				<p>Learn More?</p>
+			</div>
+			<div id = "goBackButton" class = "hidden">
+				<p>Go back</p>
+			</div>
 
-		<div id = "explanantionModal" class "closed">
+		</div>
+
+		<div id = "explanationModal" class = "hidden">
 			<p>Explanation Modal</p>
 		</div>
 
 
 
 		<div id="notes">
-			<p>Hailey's Notes to Self: Explanation Modal will be expandable, the input/output boxes will begin centered, and the explanation will start out as a sliver, if the user expands the modal to see the explanation, then the input/output boxes will move to the left to allow for the full size modal. This is also where I'm thinking of including more info and citations, although I think those should be double-exposed (also a nav-bar selectable?)</p> 
 		</div>
 
 	</body>

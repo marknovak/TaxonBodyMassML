@@ -22,26 +22,36 @@ ul li a:hover {
   background-color: #111111;
 }
 
-#mainBox {
+#onRight {
+	float: right;
+}
 
+.hidden {
+	display: none !important;
 }
 
 #inputBox {
 	border: 2px solid black;
 	position: fixed;
-	top: 30%;
-	left: 25%;
+	top: 35%;
+	left: 37.5%;
 	width: 22.5%;
 }
 
-#outputBox {
-	float: left;
-	border: 2px solid black;;
-	position: fixed;
-	top: 50%;
-	left: 25%;
+#inputBox.moved {
+        left: 22%;	
 }
 
+#outputBox {
+	border: 2px solid black;;
+	position: fixed;
+	top: 33%;
+	left: 48%;
+}
+
+#outputBox.moved {
+	left: 22%;
+}
 
 #massOutput {
         float: left;
@@ -53,14 +63,13 @@ ul li a:hover {
         border: 2px solid black;;
 }
 
-#explanantionModal {
-        float: right;
+#explanationModal {
         border: 2px solid black;
 	height: 70%;
 	width: 30%;
 	position: fixed;
 	top: 20%;
-	right: 5%;
+	right: 22%;
 }
 
 #notes {
