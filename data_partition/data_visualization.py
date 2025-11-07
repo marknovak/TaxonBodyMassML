@@ -40,10 +40,22 @@ def separate_test_train(df_bins, test_train_split_proportion):
 
     return test, train
             
-    
+def z_normalization(df):
+    print("Number of missing values in each column:\n", df.isna().sum())
+    df = df.dropna()
+    df["normalized_mass"] = (df["mass_g"] - df["mass_g"].mean()) / df["mass_g"].std()
+    plt.hist(df["normalized_mass"])
+    plt.title(f"normalized mass distribution")
+    plt.xlabel("Normalized Mass")
+    plt.ylabel("Count")
+    plt.show()
+    plt.cla()
+    print(df)
+    return df
     
 def main():
     df = pd.read_csv("./data/BodyMass.csv")
+    
     low_bound = 1
     high_bound = 10000
     num_bins = 30
@@ -85,7 +97,9 @@ def main():
     plt.show()
     plt.cla()
     
+    df = z_normalization(df)
+    
     test.to_csv("test.csv", index=False)
     train.to_csv("train.csv", index=False)
-
+    
 main()
