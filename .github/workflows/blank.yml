@@ -38,9 +38,9 @@ jobs:
     
     on:
       push:
-        branches: [ main, develop ]
+        branches: [ main, web-dev ]
       pull_request:
-        branches: [ main, develop ]
+        branches: [ main, web-dev ]
     
     jobs:
       lint:
