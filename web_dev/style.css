@@ -31,51 +31,57 @@ ul li a:hover {
 }
 
 #inputBox {
+	text-align: center;
 	border: 2px solid black;
 	position: fixed;
-	top: 35%;
-	left: 37.5%;
-	width: 22.5%;
+	top: 33%;
+	left: 32.5%;
+	width: 30%;
+	height: 30%;
 }
 
 #inputBox.moved {
-        left: 22%;	
+        left: 17.5%;	
 }
 
 #outputBox {
+	text-align: center;
+	width: 30%;
+	height: 30%;
 	border: 2px solid black;;
 	position: fixed;
 	top: 33%;
-	left: 48%;
+	right: 17.5%;
 }
 
 #outputBox.moved {
-	left: 22%;
+	left: 17.5%;
 }
 
 #massOutput {
+	height: 50%;
+	width: 46.75%;
+	margin: 3.5px;
         float: left;
         border: 2px solid black;;
 }
 
 #confidenceOutput {
+	height: 50%;
+	width: 46.75%;
+	margin: 3.5px;
         float: left;
         border: 2px solid black;;
 }
 
 #explanationModal {
+	text-align: center;
         border: 2px solid black;
 	height: 70%;
 	width: 30%;
 	position: fixed;
 	top: 20%;
-	right: 22%;
-}
-
-#notes {
-	position: fixed;
-	bottom: 0;
-	font-size: 12px;
+	right: 17.5%;
 }
 
 img {
@@ -83,4 +89,24 @@ img {
 	width: 33%;
 }
 
+#note {
+	font-size: 12.5px;
+	margin: 2px;
+}
+
+#inputBar {
+	margin: 10px;
+}
+
+#goButton {
+	margin: 10px;
+}
+
+#learnMoreArrow {
+	margin: 10px;
+}
+
+#goBackButton {
+	margin: 10px;
+}
 

@@ -13,42 +13,34 @@
 		</ul>
 
 		<div id = "inputBox">
-			<div id = "inputBar">
-                        	<p>Input Bar</p>
-               		</div>
+    			<input type="text" id="inputBar" placeholder="Input species name(s)..."/>
 			<div id = "singleOrList">
 				<button id = "singleButton">Single</button>
 				<button id = "listButton">List</button>
 			</div>
 
 			<div id = "csvCheck" class = "hidden">
-				<p>Convert output to .csv file?</p>
-				<p>note: any input with more than x species will be automatically converted to a .csv file</p>
+				<label>
+					<input type="checkbox">
+ 					Convert output to .csv file?
+					<p id="note">note: any input with more than x species will be automatically converted to a .csv file</p>
+				</label>
 			</div>
 
-			<div id = "goButton">
-				<p>Go!</p>
-			</div>
+			<button id = "goButton">Go!</button>
 
 		</div>	
 		
 		<div id = "outputBox" class ="hidden">
-                	<p>Output Box</p>
-
-			<div id = "massOutput">
-		        	<p>Mass Output</p>
-                		</div>
+			<div id = "massOutput"></div>
 
 			<div id = "confidenceOutput">
                        		<p>Confidence Output</p>
                		</div>
 
-			<div id="learnMoreArrow" class = "hidden">
-				<p>Learn More?</p>
-			</div>
-			<div id = "goBackButton" class = "hidden">
-				<p>Go back</p>
-			</div>
+			<button id="learnMoreArrow" class = "hidden">Learn More?</button>
+		
+			<button id = "goBackButton" class = "hidden">Go Back</button>
 
 		</div>
 

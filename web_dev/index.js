@@ -18,6 +18,16 @@ function handleGoClick(event){
 		outputBox.classList.toggle("hidden")
 		learnMoreArrow.classList.toggle("hidden")
 	}
+
+	const userInput = inputBar.value.trim();
+        if (userInput) {
+                massOutput.textContent = userInput
+                inputBar.value = ''
+        }
+        else {
+                massOutput.textContent = "input something"
+        }
+
 }
 
 function handleListClick(event){
@@ -50,7 +60,12 @@ function handleGoBackClick(event){
 	learnMoreArrow.classList.toggle("hidden")
 }
 
+
 goButton.addEventListener("click", handleGoClick)
+inputBar.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleGoClick();
+  });
+
 listButton.addEventListener("click", handleListClick)
 singleButton.addEventListener("click", handleSingleClick)
 learnMoreArrow.addEventListener("click", handleLearnMoreClick)
