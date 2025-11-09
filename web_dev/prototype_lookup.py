@@ -5,7 +5,7 @@ from flask_cors import CORS
 import os
 
 #read the raw bodymass data into a dataframe
-df = pd.read_csv("./data/BodyMass.csv")
+df = pd.read_csv("../data/BodyMass.csv")
 print(df)
 
 
