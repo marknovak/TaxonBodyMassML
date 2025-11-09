@@ -1,3 +1,4 @@
+/* Nav Bar */
 ul {
   list-style-type: none;
   margin: 0;
@@ -22,6 +23,13 @@ ul li a:hover {
   background-color: #111111;
 }
 
+#onRight {
+        float: right;
+}
+
+
+/* Intro Box */
+
 .overlay {
   position: fixed;
   z-index: 9999;
@@ -33,14 +41,6 @@ ul li a:hover {
 	top: 0;
 }
 
-#onRight {
-	float: right;
-}
-
-.hidden {
-	display: none !important;
-}
-
 #introBox {
 	position: fixed;
 	border: 2px solid black;
@@ -50,6 +50,16 @@ ul li a:hover {
 	top: 25%;
 	background-color: white;
 }
+
+
+/* Classes */
+
+.hidden {
+        display: none !important;
+}
+
+
+/* Input Box */
 
 #inputBox {
 	text-align: center;
@@ -64,6 +74,22 @@ ul li a:hover {
 #inputBox.moved {
         left: 17.5%;	
 }
+
+#note {
+        font-size: 12.5px;
+        margin: 2px;
+}
+
+#inputBar {
+        margin: 10px;
+}
+
+#goButton {
+        margin: 10px;
+}
+
+
+/* Output Box */
 
 #outputBox {
 	text-align: center;
@@ -95,34 +121,24 @@ ul li a:hover {
         border: 2px solid black;;
 }
 
-#explanationModal {
-	text-align: center;
-        border: 2px solid black;
-	height: 70%;
-	width: 30%;
-	position: fixed;
-	top: 15%;
-	right: 17.5%;
-}
-
-#note {
-	font-size: 12.5px;
-	margin: 2px;
-}
-
-#inputBar {
-	margin: 10px;
-}
-
-#goButton {
-	margin: 10px;
-}
-
 #learnMoreArrow {
 	margin: 10px;
 }
 
 #goBackButton {
 	margin: 10px;
+}
+
+
+/* Explanation Modal */
+
+#explanationModal {
+        text-align: center;
+        border: 2px solid black;
+        height: 70%;
+        width: 30%;
+        position: fixed;
+        top: 15%;
+        right: 17.5%;
 }
 

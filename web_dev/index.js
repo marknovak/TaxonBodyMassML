@@ -1,3 +1,4 @@
+//variable declarations: gets every element by it's unique ID
 var goButton = document.getElementById("goButton")
 var inputBar = document.getElementById("inputBar")
 var inputBox = document.getElementById("inputBox")
@@ -14,25 +15,28 @@ var goBackButton = document.getElementById("goBackButton")
 var introBox = document.getElementById("introBox")
 var closeIntro = document.getElementById("closeIntro")
 
+//function definitions
+
+//handleGoCick : makes output box visible and generates output based on input
 async function handleGoClick(event) {
 	inputBox.classList.add("moved")
 	goButton.textContent = 'Go Again!'
-
 	if (outputBox.classList.contains("hidden")) {
     		outputBox.classList.toggle("hidden")
     		learnMoreArrow.classList.toggle("hidden")
   	}
-
+	//if the user clicks go without typing any input
   	const userInput = inputBar.value.trim()
   	if (!userInput) {
     		massOutput.textContent = "no input"
     		return;
   	}
 
+	//while waiting for response
   	massOutput.textContent = "Checking species name..."
 
+	//interacting with the microservice (prototype_lookup.py)
   	try {
-    		// I will replace this with Grant's microservice when it's ready
    		const data = await myLookupMicroservice(userInput)
 
    		if (data.status === "success") {
@@ -46,10 +50,11 @@ async function handleGoClick(event) {
         	console.error(error)
         	massOutput.textContent = "Error"
     	}
-
+	//clears input bar
   	inputBar.value = ""
 }
 
+//uses render to interact with the microservice
 async function myLookupMicroservice(query) {
 	const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`;
 
@@ -74,13 +79,14 @@ async function myLookupMicroservice(query) {
   	}
 }
 
-
+//reveals the csv checkbox
 function handleListClick(event){
         if (csvCheck.classList.contains("hidden")){
 		csvCheck.classList.toggle("hidden")
 	}
 }
 
+//hides the csv check box
 function handleSingleClick(event){
         if (csvCheck.classList.contains("hidden")){
 	}
@@ -89,6 +95,7 @@ function handleSingleClick(event){
 	}
 }
 
+//hides the input box and reveals the explanation modal
 function handleLearnMoreClick(event){
 	outputBox.classList.add("moved")
 	learnMoreArrow.classList.toggle("hidden")
@@ -97,6 +104,7 @@ function handleLearnMoreClick(event){
 	goBackButton.classList.toggle("hidden")
 }
 
+//hides the explanation modal and reveals the input box
 function handleGoBackClick(event){
 	goBackButton.classList.toggle("hidden")
 	outputBox.classList.remove("moved")
@@ -105,9 +113,13 @@ function handleGoBackClick(event){
 	learnMoreArrow.classList.toggle("hidden")
 }
 
+//hides the introduction modal
 function handleCloseIntro(event){
 	introBox.classList.add("hidden")
 }
+
+
+//event listener declarations: attaching all functions to their appropriate elements
 
 goButton.addEventListener("click", handleGoClick)
 inputBar.addEventListener('keypress', (e) => {
