@@ -55,7 +55,16 @@ def z_normalization(df):
     
 def main():
     df = pd.read_csv("./data/BodyMass.csv")
-    
+    df = z_normalization(df)
+    test = pd.DataFrame()
+    train = pd.DataFrame()
+    test = df.sample(frac=0.1, replace=False)
+    train = df.drop(test.index)
+    print(test)
+    print(train)
+    test.to_csv("test.csv", index=False)
+    train.to_csv("train.csv", index=False)
+    """
     low_bound = 1
     high_bound = 10000
     num_bins = 30
@@ -96,10 +105,6 @@ def main():
     plt.ylabel("Count")
     plt.show()
     plt.cla()
-    
-    df = z_normalization(df)
-    
-    test.to_csv("test.csv", index=False)
-    train.to_csv("train.csv", index=False)
+    """
     
 main()
