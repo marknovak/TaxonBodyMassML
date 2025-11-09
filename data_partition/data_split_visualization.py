@@ -58,8 +58,8 @@ def main():
     print(train)
     
     #save the train/test split to independent csv files
-    test.to_csv("test.csv", index=False)
-    train.to_csv("train.csv", index=False)
+    test.to_csv("./data/test.csv", index=False)
+    train.to_csv("./data/train.csv", index=False)
     
     
 main()
