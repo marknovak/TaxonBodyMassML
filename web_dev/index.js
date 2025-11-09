@@ -33,7 +33,7 @@ async function handleGoClick(event) {
 
   	try {
     		// I will replace this with Grant's microservice when it's ready
-   		const data = await myFakeMicroservice(userInput)
+   		const data = await myLookupMicroservice(userInput)
 
    		if (data.status === "success") {
       			massOutput.textContent = `success: ${data.message}`
@@ -50,15 +50,27 @@ async function handleGoClick(event) {
   	inputBar.value = ""
 }
 
-//get rid of this later
-async function myFakeMicroservice(query) {
-  	const speciesList = ["Homo sapiens", "Canis lupus", "Felis catus"]
+async function myLookupMicroservice(query) {
+	const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`;
 
-  	if (speciesList.includes(query)) {
-    		return { status: "success", message: `${query}` }
- 	 } 	
-	else {
-    		return { status: "error", error: `not found` }
+	try {
+    		const response = await fetch(url);
+		const data = await response.json();
+
+    		if (response.ok) {
+      			return {
+        			status: "success",
+        			message: `${data.species_name} mass = ${data.mass_g} g`
+      			};
+    		}
+		else {
+      			return { status: "error", error: data.error || "Unknown error" };
+    		}
+
+  	}
+	catch (error) {
+    		console.error("Network error:", error);
+    		return { status: "error", error: "Network error" };
   	}
 }
 
