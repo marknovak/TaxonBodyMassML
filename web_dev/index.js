@@ -15,49 +15,50 @@ var introBox = document.getElementById("introBox")
 var closeIntro = document.getElementById("closeIntro")
 
 async function handleGoClick(event) {
-	inputBox.classList.add("moved");
+	inputBox.classList.add("moved")
+	goButton.textContent = 'Go Again!'
 
 	if (outputBox.classList.contains("hidden")) {
-    		outputBox.classList.toggle("hidden");
-    		learnMoreArrow.classList.toggle("hidden");
+    		outputBox.classList.toggle("hidden")
+    		learnMoreArrow.classList.toggle("hidden")
   	}
 
-  	const userInput = inputBar.value.trim();
+  	const userInput = inputBar.value.trim()
   	if (!userInput) {
-    		massOutput.textContent = "no input";
+    		massOutput.textContent = "no input"
     		return;
   	}
 
-  	massOutput.textContent = "Checking species name...";
+  	massOutput.textContent = "Checking species name..."
 
   	try {
     		// I will replace this with Grant's microservice when it's ready
-   		const data = await myFakeMicroservice(userInput);
+   		const data = await myFakeMicroservice(userInput)
 
    		if (data.status === "success") {
-      			massOutput.textContent = `success: ${data.message}`;
+      			massOutput.textContent = `success: ${data.message}`
     		}
 		else {
-      			massOutput.textContent = `not success: ${data.error}`;
+      			massOutput.textContent = `not success: ${data.error}`
     		}
 	}
 	catch (error) {
-        	console.error(error);
-        	massOutput.textContent = "Error";
+        	console.error(error)
+        	massOutput.textContent = "Error"
     	}
 
-  	inputBar.value = "";
+  	inputBar.value = ""
 }
 
 //get rid of this later
 async function myFakeMicroservice(query) {
-  	const speciesList = ["Homo sapiens", "Canis lupus", "Felis catus"];
+  	const speciesList = ["Homo sapiens", "Canis lupus", "Felis catus"]
 
   	if (speciesList.includes(query)) {
-    		return { status: "success", message: `${query}` };
+    		return { status: "success", message: `${query}` }
  	 } 	
 	else {
-    		return { status: "error", error: `not found` };
+    		return { status: "error", error: `not found` }
   	}
 }
 
