@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from ydata_profiling import ProfileReport
+
 
 #separate a dataset into (num_bins) bins and display a histogram based on "mass_g" variable
 #Split each bin into its own dataframe and return as a list
@@ -44,18 +46,22 @@ def z_normalization(df):
     print("Number of missing values in each column:\n", df.isna().sum())
     df = df.dropna()
     df["normalized_mass"] = (df["mass_g"] - df["mass_g"].mean()) / df["mass_g"].std()
+    """
     plt.hist(df["normalized_mass"])
     plt.title(f"normalized mass distribution")
     plt.xlabel("Normalized Mass")
     plt.ylabel("Count")
     plt.show()
     plt.cla()
+    """
     print(df)
     return df
     
 def main():
     df = pd.read_csv("./data/BodyMass.csv")
     df = z_normalization(df)
+    profile = ProfileReport(df, title="Profiling Report")
+    profile.to_file("my_report.html")
     test = pd.DataFrame()
     train = pd.DataFrame()
     test = df.sample(frac=0.1, replace=False)
