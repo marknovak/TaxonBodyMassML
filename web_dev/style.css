@@ -22,6 +22,17 @@ ul li a:hover {
   background-color: #111111;
 }
 
+.overlay {
+  position: fixed;
+  z-index: 9999;
+}
+
+#closeIntro {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
 #onRight {
 	float: right;
 }
@@ -30,11 +41,21 @@ ul li a:hover {
 	display: none !important;
 }
 
+#introBox {
+	position: fixed;
+	border: 2px solid black;
+	width: 50%;
+	height: 50%;
+	left: 25%;
+	top: 25%;
+	background-color: white;
+}
+
 #inputBox {
 	text-align: center;
 	border: 2px solid black;
 	position: fixed;
-	top: 33%;
+	top: 32.5%;
 	left: 32.5%;
 	width: 30%;
 	height: 30%;
@@ -50,7 +71,7 @@ ul li a:hover {
 	height: 30%;
 	border: 2px solid black;;
 	position: fixed;
-	top: 33%;
+	top: 32.5%;
 	right: 17.5%;
 }
 
@@ -80,7 +101,7 @@ ul li a:hover {
 	height: 70%;
 	width: 30%;
 	position: fixed;
-	top: 20%;
+	top: 15%;
 	right: 17.5%;
 }
 
