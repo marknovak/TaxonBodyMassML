@@ -1,6 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from ydata_profiling import ProfileReport
+import seaborn as sns
+import numpy as np
+from sklearn.preprocessing import PowerTransformer
+
+
 
 
 #separate a dataset into (num_bins) bins and display a histogram based on "mass_g" variable
@@ -46,15 +51,23 @@ def z_normalization(df):
     print("Number of missing values in each column:\n", df.isna().sum())
     df = df.dropna()
     df["normalized_mass"] = (df["mass_g"] - df["mass_g"].mean()) / df["mass_g"].std()
-    """
-    plt.hist(df["normalized_mass"])
-    plt.title(f"normalized mass distribution")
-    plt.xlabel("Normalized Mass")
-    plt.ylabel("Count")
-    plt.show()
-    plt.cla()
-    """
     print(df)
+    
+    sns.histplot(np.log1p(df["mass_g"]), bins=50, kde=True)
+    plt.title("Log-Transformed mass_g (log1p)")
+    plt.ylabel("Count")
+    plt.xlabel("Mass (g)")
+    plt.show()
+    
+    pt = PowerTransformer(method='yeo-johnson')
+    normalized_mass = df["normalized_mass"].to_numpy()
+    transformed = pt.fit_transform(normalized_mass.reshape(-1, 1))
+    sns.histplot(transformed, bins=50, kde=True)
+    plt.title("Yeo-Johnson Transformed Mass Data")
+    plt.ylabel("Count")
+    plt.xlabel("Z-Normalized Mass")
+    plt.show()
+    
     return df
     
 def main():
