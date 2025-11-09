@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "vitest": "^4.0.8"
+  },
+  "vitest": {
+    "environment": "jsdom"
+  },
+  "devDependencies": {
+    "jsdom": "^27.1.0"
+  }
+}
