@@ -7,13 +7,14 @@ It creates a log1p visualization of mass_g and a
 yeo-johnson visualization of z-normalized mass.
 It samples 10% of the data as test data and saves new test/train data.
 """
-import pandas as pd
-import matplotlib.pyplot as plt
+
 import matplotlib
-from ydata_profiling import ProfileReport
-import seaborn as sns
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 from sklearn.preprocessing import PowerTransformer
+from ydata_profiling import ProfileReport
 
 matplotlib.use("TkAgg")
 
@@ -30,8 +31,8 @@ def z_normalization(df):
     df = df.dropna()
 
     # normalize mass data using z-normalization
-    df["normalized_mass"] = (df["mass_g"]
-                             - df["mass_g"].mean()) / df["mass_g"].std()
+    temp = df["mass_g"]
+    df["normalized_mass"] = (temp - temp.mean()) / temp.std()
     print(df)
 
     return df
