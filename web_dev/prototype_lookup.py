@@ -1,9 +1,10 @@
 """
 prototype_lookup.py
 -------------------
-Provides API endpoints for prototype lookup operations in the web development module.
-single_species endpoint receives an input of 
+Provides API endpoints for prototype lookup
+operations in the web development module.
 """
+
 import os
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -24,7 +25,8 @@ print(df)
 
 # save taxon column as a list and parse it such that it's only the species name
 taxon = df["taxon"].to_list()
-for i in range(len(taxon)):
+taxon_len = len(taxon)
+for i in range(taxon_len):
     # print(taxon[i])
     for j in range(len(taxon[i])):
         if taxon[i][j] == "_":
@@ -35,7 +37,6 @@ for i in range(len(taxon)):
 df["species_name"] = taxon
 
 print(df)
-
 
 
 @app.route("/single_species", methods=["GET"])
