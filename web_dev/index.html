@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <title>TaxonBodyMassML</title>
+    <link rel="stylesheet" href="style.css?v=5" />
+  </head>
+  <script src="index.js?v=5" charset="utf-8" defer></script>
+  <body>
+    <!-- jscpd:ignore-start -->
+    <ul id="nav-bar">
+      <li><a href="./index.html">Design Plan</a></li>
+      <li><a href="./data_visualization.html">Data Visualization</a></li>
+      <li><a href="./citations.html">Citations</a></li>
+      <li id="on-right"><a href="./help_page.html">Help</a></li>
+    </ul>
+    <!-- jscpd:ignore-end -->
+
+    <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
+    <div id="intro-box" class="overlay">
+      <p>
+        Welcome to *insert website name*, to predict a species mass, input the
+        name and press go! For additional help, access th e 'Help' page from the
+        upper righthand corner
+      </p>
+      <button id="close-intro">X</button>
+    </div>
+
+    <!-- Main box containing input bar for users -->
+    <div id="input-box">
+      <input
+        type="text"
+        id="input-bar"
+        placeholder="Input species name(s)..."
+      />
+      <div id="single-or-list">
+        <button id="single-button">Single</button>
+        <button id="list-button">List</button>
+      </div>
+
+      <!-- only visible when 'list' is selected -->
+      <div id="csv-check" class="hidden">
+        <label>
+          <input type="checkbox" />
+          Convert output to .csv file?
+          <p id="note">
+            note: any input with more than x species will be automatically
+            converted to a .csv file
+          </p>
+        </label>
+      </div>
+
+      <!-- click to generate output -->
+      <button id="go-button">Go!</button>
+    </div>
+
+    <!-- Main box containing output: mass and confidence interval -->
+    <!-- Is only visible after user clicks go -->
+    <div id="output-box" class="hidden">
+      <div id="mass-output"></div>
+
+      <div id="confidence-output">
+        <p>Confidence Output</p>
+      </div>
+
+      <!-- expands explanation modal -->
+      <!-- clicking this button hides input box -->
+      <button id="learn-more-arrow" class="hidden">Learn More?</button>
+
+      <!-- Only visible after explanation modal is expanded -->
+      <button id="go-back-button" class="hidden">Go Back</button>
+    </div>
+
+    <!-- Box with information about how mass was reached -->
+    <!-- Is only visible after learn more arrow is clicked -->
+    <div id="explanation-modal" class="hidden">
+      <p>Explanation Modal</p>
+    </div>
+  </body>
+</html>
