@@ -1,68 +1,73 @@
-<!DOCTYPE html>
-	<head>
-        	<title>TaxonBodyMassML</title>
-		<link rel="stylesheet" href="style.css?v=5">
-		<script src="index.js?v=5" charset="utf-8" defer></script>	
-	</head>
-	<body>
-		<ul id="navBar">
-			<li><a href="./index.html">Design Plan</a></li>
- 			<li><a href="./data_visualization.html">Data Visualization</a></li>
-			<li><a href="./citations.html">Citations</a></li>
-			<li id="onRight"><a href="./help_page.html">Help</a></li>
-		</ul>
+<!doctype html>
+<html>
+  <head>
+    <title>TaxonBodyMassML</title>
+    <link rel="stylesheet" href="style.css?v=5" />
+    <script src="index.js?v=5" charset="utf-8" defer></script>
+  </head>
+  <body>
+    <ul id="navBar">
+      <li><a href="./index.html">Design Plan</a></li>
+      <li><a href="./data_visualization.html">Data Visualization</a></li>
+      <li><a href="./citations.html">Citations</a></li>
+      <li id="onRight"><a href="./help_page.html">Help</a></li>
+    </ul>
 
-		<!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
-		<div id = "introBox" class = "overlay">
-			<p>Welcome to *insert website name*, to predict a species mass, input the name and press go! For additional help, access th					e 'Help' page from the upper righthand corner</p>
-			<button id = "closeIntro">X</button>
-		</div> 
+    <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
+    <div id="introBox" class="overlay">
+      <p>
+        Welcome to *insert website name*, to predict a species mass, input the
+        name and press go! For additional help, access th e 'Help' page from the
+        upper righthand corner
+      </p>
+      <button id="closeIntro">X</button>
+    </div>
 
-		<!-- Main box containing input bar for users -->
-		<div id = "inputBox">
-    			<input type="text" id="inputBar" placeholder="Input species name(s)..."/>
-			<div id = "singleOrList">
-				<button id = "singleButton">Single</button>
-				<button id = "listButton">List</button>
-			</div>
-	
-			<!-- only visible when 'list' is selected -->
-			<div id = "csvCheck" class = "hidden">
-				<label>
-					<input type="checkbox">
- 					Convert output to .csv file?
-					<p id="note">note: any input with more than x species will be automatically converted to a .csv file</p>
-				</label>
-			</div>
+    <!-- Main box containing input bar for users -->
+    <div id="inputBox">
+      <input type="text" id="inputBar" placeholder="Input species name(s)..." />
+      <div id="singleOrList">
+        <button id="singleButton">Single</button>
+        <button id="listButton">List</button>
+      </div>
 
-		 	<!-- click to generate output -->
-			<button id = "goButton">Go!</button>
+      <!-- only visible when 'list' is selected -->
+      <div id="csvCheck" class="hidden">
+        <label>
+          <input type="checkbox" />
+          Convert output to .csv file?
+          <p id="note">
+            note: any input with more than x species will be automatically
+            converted to a .csv file
+          </p>
+        </label>
+      </div>
 
-		</div>	
-		
-		<!-- Main box containing output: mass and confidence interval -->
-		<!-- Is only visible after user clicks go -->
-		<div id = "outputBox" class ="hidden">
-			<div id = "massOutput"></div>
+      <!-- click to generate output -->
+      <button id="goButton">Go!</button>
+    </div>
 
-			<div id = "confidenceOutput">
-                       		<p>Confidence Output</p>
-               		</div>
+    <!-- Main box containing output: mass and confidence interval -->
+    <!-- Is only visible after user clicks go -->
+    <div id="outputBox" class="hidden">
+      <div id="massOutput"></div>
 
-			<!-- expands explanation modal -->
-			<!-- clicking this button hides input box -->
-			<button id="learnMoreArrow" class = "hidden">Learn More?</button>
-		
-			<!-- Only visible after explanation modal is expanded -->
-			<button id = "goBackButton" class = "hidden">Go Back</button>
+      <div id="confidenceOutput">
+        <p>Confidence Output</p>
+      </div>
 
-		</div>
+      <!-- expands explanation modal -->
+      <!-- clicking this button hides input box -->
+      <button id="learnMoreArrow" class="hidden">Learn More?</button>
 
-		<!-- Box with information about how mass was reached -->
-		<!-- Is only visible after learn more arrow is clicked -->
-		<div id = "explanationModal" class = "hidden">
-			<p>Explanation Modal</p>
-		</div>
+      <!-- Only visible after explanation modal is expanded -->
+      <button id="goBackButton" class="hidden">Go Back</button>
+    </div>
 
-	</body>
+    <!-- Box with information about how mass was reached -->
+    <!-- Is only visible after learn more arrow is clicked -->
+    <div id="explanationModal" class="hidden">
+      <p>Explanation Modal</p>
+    </div>
+  </body>
 </html>

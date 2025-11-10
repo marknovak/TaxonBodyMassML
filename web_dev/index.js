@@ -1,135 +1,126 @@
 //variable declarations: gets every element by it's unique ID
-var goButton = document.getElementById("goButton")
-var inputBar = document.getElementById("inputBar")
-var inputBox = document.getElementById("inputBox")
-var singleButton = document.getElementById("singleButton")
-var listButton = document.getElementById("listButton")
-var singleOrList = document.getElementById("singleOrList")
-var csvCheck = document.getElementById("csvCheck")
-var outputBox = document.getElementById("outputBox")
-var massOutput = document.getElementById("massOutput")
-var confidenceOutput = document.getElementById("confidenceOutput")
-var learnMoreArrow = document.getElementById("learnMoreArrow")
-var explanationModal = document.getElementById("explanationModal")
-var goBackButton = document.getElementById("goBackButton")
-var introBox = document.getElementById("introBox")
-var closeIntro = document.getElementById("closeIntro")
+var goButton = document.getElementById("goButton");
+var inputBar = document.getElementById("inputBar");
+var inputBox = document.getElementById("inputBox");
+var singleButton = document.getElementById("singleButton");
+var listButton = document.getElementById("listButton");
+var singleOrList = document.getElementById("singleOrList");
+var csvCheck = document.getElementById("csvCheck");
+var outputBox = document.getElementById("outputBox");
+var massOutput = document.getElementById("massOutput");
+var confidenceOutput = document.getElementById("confidenceOutput");
+var learnMoreArrow = document.getElementById("learnMoreArrow");
+var explanationModal = document.getElementById("explanationModal");
+var goBackButton = document.getElementById("goBackButton");
+var introBox = document.getElementById("introBox");
+var closeIntro = document.getElementById("closeIntro");
 
 //function definitions
 
 //handleGoCick : makes output box visible and generates output based on input
 async function handleGoClick(event) {
-	inputBox.classList.add("moved")
-	goButton.textContent = 'Go Again!'
-	if (outputBox.classList.contains("hidden")) {
-    		outputBox.classList.toggle("hidden")
-    		learnMoreArrow.classList.toggle("hidden")
-  	}
-	//if the user clicks go without typing any input
-  	const userInput = inputBar.value.trim()
-  	if (!userInput) {
-    		massOutput.textContent = "no input"
-    		return;
-  	}
+  inputBox.classList.add("moved");
+  goButton.textContent = "Go Again!";
+  if (outputBox.classList.contains("hidden")) {
+    outputBox.classList.toggle("hidden");
+    learnMoreArrow.classList.toggle("hidden");
+  }
+  //if the user clicks go without typing any input
+  const userInput = inputBar.value.trim();
+  if (!userInput) {
+    massOutput.textContent = "no input";
+    return;
+  }
 
-	//while waiting for response
-  	massOutput.textContent = "Checking species name..."
+  //while waiting for response
+  massOutput.textContent = "Checking species name...";
 
-	//interacting with the microservice (prototype_lookup.py)
-  	try {
-   		const data = await myLookupMicroservice(userInput)
+  //interacting with the microservice (prototype_lookup.py)
+  try {
+    const data = await myLookupMicroservice(userInput);
 
-   		if (data.status === "success") {
-      			massOutput.textContent = `success: ${data.message}`
-    		}
-		else {
-      			massOutput.textContent = `not success: ${data.error}`
-    		}
-	}
-	catch (error) {
-        	console.error(error)
-        	massOutput.textContent = "Error"
-    	}
-	//clears input bar
-  	inputBar.value = ""
+    if (data.status === "success") {
+      massOutput.textContent = `success: ${data.message}`;
+    } else {
+      massOutput.textContent = `not success: ${data.error}`;
+    }
+  } catch (error) {
+    console.error(error);
+    massOutput.textContent = "Error";
+  }
+  //clears input bar
+  inputBar.value = "";
 }
 
 //uses render to interact with the microservice
 async function myLookupMicroservice(query) {
-	const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`;
+  const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`;
 
-	try {
-    		const response = await fetch(url);
-		const data = await response.json();
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-    		if (response.ok) {
-      			return {
-        			status: "success",
-        			message: `${data.species_name} mass = ${data.mass_g} g`
-      			};
-    		}
-		else {
-      			return { status: "error", error: data.error || "Unknown error" };
-    		}
-
-  	}
-	catch (error) {
-    		console.error("Network error:", error);
-    		return { status: "error", error: "Network error" };
-  	}
+    if (response.ok) {
+      return {
+        status: "success",
+        message: `${data.species_name} mass = ${data.mass_g} g`,
+      };
+    } else {
+      return { status: "error", error: data.error || "Unknown error" };
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    return { status: "error", error: "Network error" };
+  }
 }
 
 //reveals the csv checkbox
-function handleListClick(event){
-        if (csvCheck.classList.contains("hidden")){
-		csvCheck.classList.toggle("hidden")
-	}
+function handleListClick(event) {
+  if (csvCheck.classList.contains("hidden")) {
+    csvCheck.classList.toggle("hidden");
+  }
 }
 
 //hides the csv check box
-function handleSingleClick(event){
-        if (csvCheck.classList.contains("hidden")){
-	}
-	else{
-		csvCheck.classList.toggle("hidden")
-	}
+function handleSingleClick(event) {
+  if (csvCheck.classList.contains("hidden")) {
+  } else {
+    csvCheck.classList.toggle("hidden");
+  }
 }
 
 //hides the input box and reveals the explanation modal
-function handleLearnMoreClick(event){
-	outputBox.classList.add("moved")
-	learnMoreArrow.classList.toggle("hidden")
-	explanationModal.classList.toggle("hidden")
-	inputBox.classList.add("hidden")
-	goBackButton.classList.toggle("hidden")
+function handleLearnMoreClick(event) {
+  outputBox.classList.add("moved");
+  learnMoreArrow.classList.toggle("hidden");
+  explanationModal.classList.toggle("hidden");
+  inputBox.classList.add("hidden");
+  goBackButton.classList.toggle("hidden");
 }
 
 //hides the explanation modal and reveals the input box
-function handleGoBackClick(event){
-	goBackButton.classList.toggle("hidden")
-	outputBox.classList.remove("moved")
-	inputBox.classList.toggle("hidden")
-	explanationModal.classList.toggle("hidden")
-	learnMoreArrow.classList.toggle("hidden")
+function handleGoBackClick(event) {
+  goBackButton.classList.toggle("hidden");
+  outputBox.classList.remove("moved");
+  inputBox.classList.toggle("hidden");
+  explanationModal.classList.toggle("hidden");
+  learnMoreArrow.classList.toggle("hidden");
 }
 
 //hides the introduction modal
-function handleCloseIntro(event){
-	introBox.classList.add("hidden")
+function handleCloseIntro(event) {
+  introBox.classList.add("hidden");
 }
-
 
 //event listener declarations: attaching all functions to their appropriate elements
 
-goButton.addEventListener("click", handleGoClick)
-inputBar.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleGoClick();
-  });
+goButton.addEventListener("click", handleGoClick);
+inputBar.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") handleGoClick();
+});
 
-listButton.addEventListener("click", handleListClick)
-singleButton.addEventListener("click", handleSingleClick)
-learnMoreArrow.addEventListener("click", handleLearnMoreClick)
-goBackButton.addEventListener("click", handleGoBackClick)
-closeIntro.addEventListener("click", handleCloseIntro)
-
-
+listButton.addEventListener("click", handleListClick);
+singleButton.addEventListener("click", handleSingleClick);
+learnMoreArrow.addEventListener("click", handleLearnMoreClick);
+goBackButton.addEventListener("click", handleGoBackClick);
+closeIntro.addEventListener("click", handleCloseIntro);
