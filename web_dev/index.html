@@ -2,16 +2,18 @@
 <html>
   <head>
     <title>TaxonBodyMassML</title>
-    <link rel="stylesheet" href="style.css?v=5" />>
+    <link rel="stylesheet" href="style.css?v=5" />
   </head>
   <script src="index.js?v=5" charset="utf-8" defer></script>
   <body>
-    <ul id="navBar">
+    <!-- jscpd:ignore-start -->
+    <ul id="nav-bar">
       <li><a href="./index.html">Design Plan</a></li>
       <li><a href="./data_visualization.html">Data Visualization</a></li>
       <li><a href="./citations.html">Citations</a></li>
       <li id="on-right"><a href="./help_page.html">Help</a></li>
     </ul>
+    <!-- jscpd:ignore-end -->
 
     <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
     <div id="intro-box" class="overlay">
@@ -25,7 +27,11 @@
 
     <!-- Main box containing input bar for users -->
     <div id="input-box">
-      <input type="text" id="inputBar" placeholder="Input species name(s)..." />
+      <input
+        type="text"
+        id="input-bar"
+        placeholder="Input species name(s)..."
+      />
       <div id="single-or-list">
         <button id="single-button">Single</button>
         <button id="list-button">List</button>
