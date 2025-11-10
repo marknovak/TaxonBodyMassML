@@ -1,111 +1,127 @@
-var goButton = document.getElementById("goButton")
-var inputBar = document.getElementById("inputBar")
-var inputBox = document.getElementById("inputBox")
-var singleButton = document.getElementById("singleButton")
-var listButton = document.getElementById("listButton")
-var singleOrList = document.getElementById("singleOrList")
-var csvCheck = document.getElementById("csvCheck")
-var outputBox = document.getElementById("outputBox")
-var massOutput = document.getElementById("massOutput")
-var confidenceOutput = document.getElementById("confidenceOutput")
-var learnMoreArrow = document.getElementById("learnMoreArrow")
-var explanationModal = document.getElementById("explanationModal")
-var goBackButton = document.getElementById("goBackButton")
-var introBox = document.getElementById("introBox")
-var closeIntro = document.getElementById("closeIntro")
+let goButton, inputBar, inputBox, singleButton, listButton, csvCheck, outputBox, massOutput, learnMoreArrow, explanationModal, goBackButton, introBox, closeIntro;
 
-async function handleGoClick(event) {
-	inputBox.classList.add("moved")
-	goButton.textContent = 'Go Again!'
+export function initializeDOM(doc = document) {
+  goButton = doc.getElementById("go-button");
+  inputBar = doc.getElementById("inputBar");
+  inputBox = doc.getElementById("input-box");
+  singleButton = doc.getElementById("single-button");
+  listButton = doc.getElementById("list-button");
+  csvCheck = doc.getElementById("csv-check");
+  outputBox = doc.getElementById("output-box");
+  massOutput = doc.getElementById("massOutput");
+  learnMoreArrow = doc.getElementById("learn-more-arrow");
+  explanationModal = doc.getElementById("explanation-modal");
+  goBackButton = doc.getElementById("go-back-button");
+  introBox = doc.getElementById("intro-box");
+  closeIntro = doc.getElementById("close-intro");
 
-	if (outputBox.classList.contains("hidden")) {
-    		outputBox.classList.toggle("hidden")
-    		learnMoreArrow.classList.toggle("hidden")
-  	}
-
-  	const userInput = inputBar.value.trim()
-  	if (!userInput) {
-    		massOutput.textContent = "no input"
-    		return;
-  	}
-
-  	massOutput.textContent = "Checking species name..."
-
-  	try {
-    		// I will replace this with Grant's microservice when it's ready
-   		const data = await myFakeMicroservice(userInput)
-
-   		if (data.status === "success") {
-      			massOutput.textContent = `success: ${data.message}`
-    		}
-		else {
-      			massOutput.textContent = `not success: ${data.error}`
-    		}
-	}
-	catch (error) {
-        	console.error(error)
-        	massOutput.textContent = "Error"
-    	}
-
-  	inputBar.value = ""
-}
-
-//get rid of this later
-async function myFakeMicroservice(query) {
-  	const speciesList = ["Homo sapiens", "Canis lupus", "Felis catus"]
-
-  	if (speciesList.includes(query)) {
-    		return { status: "success", message: `${query}` }
- 	 } 	
-	else {
-    		return { status: "error", error: `not found` }
-  	}
-}
-
-
-function handleListClick(event){
-        if (csvCheck.classList.contains("hidden")){
-		csvCheck.classList.toggle("hidden")
-	}
-}
-
-function handleSingleClick(event){
-        if (csvCheck.classList.contains("hidden")){
-	}
-	else{
-		csvCheck.classList.toggle("hidden")
-	}
-}
-
-function handleLearnMoreClick(event){
-	outputBox.classList.add("moved")
-	learnMoreArrow.classList.toggle("hidden")
-	explanationModal.classList.toggle("hidden")
-	inputBox.classList.add("hidden")
-	goBackButton.classList.toggle("hidden")
-}
-
-function handleGoBackClick(event){
-	goBackButton.classList.toggle("hidden")
-	outputBox.classList.remove("moved")
-	inputBox.classList.toggle("hidden")
-	explanationModal.classList.toggle("hidden")
-	learnMoreArrow.classList.toggle("hidden")
-}
-
-function handleCloseIntro(event){
-	introBox.classList.add("hidden")
-}
-
-goButton.addEventListener("click", handleGoClick)
-inputBar.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleGoClick();
+  Object.assign(globalThis, {
+    goButton,
+    inputBar,
+    inputBox,
+    singleButton,
+    listButton,
+    csvCheck,
+    outputBox,
+    massOutput,
+    learnMoreArrow,
+    explanationModal,
+    goBackButton,
+    introBox,
+    closeIntro,
   });
+}
 
-listButton.addEventListener("click", handleListClick)
-singleButton.addEventListener("click", handleSingleClick)
-learnMoreArrow.addEventListener("click", handleLearnMoreClick)
-goBackButton.addEventListener("click", handleGoBackClick)
-closeIntro.addEventListener("click", handleCloseIntro)
+export async function handleGoClick() {
+  inputBox.classList.add("moved");
+  goButton.textContent = "Go Again!";
 
+  if (outputBox.classList.contains("hidden")) {
+    outputBox.classList.toggle("hidden");
+    learnMoreArrow.classList.toggle("hidden");
+  }
 
+  const userInput = inputBar.value.trim();
+  if (!userInput) {
+    massOutput.textContent = "no input";
+    return;
+  }
+
+  massOutput.textContent = "Checking species name...";
+
+  try {
+    // ✅ dynamically reference exported function (so mock works)
+    const data = await exports.myLookupMicroservice(userInput);
+
+    if (data.status === "success") {
+      massOutput.textContent = `success: ${data.message}`;
+    } else {
+      massOutput.textContent = `not success: ${data.error}`;
+    }
+  } catch (error) {
+    console.error(error);
+    massOutput.textContent = "Error";
+  }
+
+  inputBar.value = "";
+}
+
+export async function myLookupMicroservice(query) {
+  const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (response.ok) {
+      return {
+        status: "success",
+        message: `${data.species_name} mass = ${data.mass_g} g`,
+      };
+    } else {
+      return { status: "error", error: data.error || "Unknown error" };
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    return { status: "error", error: "Network error" };
+  }
+}
+
+export function handleListClick() {
+  if (csvCheck.classList.contains("hidden")) csvCheck.classList.toggle("hidden");
+}
+
+export function handleSingleClick() {
+  if (!csvCheck.classList.contains("hidden")) csvCheck.classList.toggle("hidden");
+}
+
+export function handleLearnMoreClick() {
+  outputBox.classList.add("moved");
+  learnMoreArrow.classList.toggle("hidden");
+  explanationModal.classList.toggle("hidden");
+  inputBox.classList.add("hidden");
+  goBackButton.classList.toggle("hidden");
+}
+
+export function handleGoBackClick() {
+  goBackButton.classList.toggle("hidden");
+  outputBox.classList.remove("moved");
+  inputBox.classList.toggle("hidden");
+  explanationModal.classList.toggle("hidden");
+  learnMoreArrow.classList.toggle("hidden");
+}
+
+export function handleCloseIntro() {
+  introBox.classList.add("hidden");
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("DOMContentLoaded", () => {
+    initializeDOM(document);
+    goButton?.addEventListener("click", handleGoClick);
+    inputBar?.addEventListener("keypress", (e) => e.key === "Enter" && handleGoClick());
+    listButton?.addEventListener("click", handleListClick);
+    singleButton?.addEventListener("click", handleSingleClick);
+    learnMoreArrow?.addEventListener("click", handleLearnMoreClick);
+    goBackButton?.addEventListener("click", handleGoBackClick);
+    closeIntro?.addEventListener("click", handleCloseIntro);
+  });
+}

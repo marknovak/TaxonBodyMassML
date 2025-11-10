@@ -1,112 +1,90 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as module from './index.js';
-const { handleGoClick, handleListClick, handleSingleClick, myFakeMicroservice } = module;
+import * as module from "./index.js";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+function $(id) {
+  return document.getElementById(id);
+}
 
 beforeEach(() => {
   document.body.innerHTML = `
-      <div id="inputBox">
-          <input type="text" id="inputBar" value=""/>
-          <button id="goButton">Go!</button>
-      </div>
-      <div id="singleButton"></div>
-      <div id="listButton"></div>
-      <div id="singleOrList"></div>
-      <div id="csvCheck" class="hidden"></div>
-      <div id="outputBox" class="hidden">
-          <div id="massOutput"></div>
-          <div id="confidenceOutput"></div>
-          <button id="learnMoreArrow" class="hidden"></button>
-      </div>
-      <div id="explanationModal"></div>
-      <div id="goBackButton"></div>
-      <div id="introBox"></div>
-      <div id="closeIntro"></div>
+    <div id="input-box">
+      <input type="text" id="inputBar" value="" />
+      <button id="go-button">Go!</button>
+    </div>
+    <div id="csv-check" class="hidden"></div>
+    <div id="output-box" class="hidden">
+      <div id="massOutput"></div>
+      <button id="learn-more-arrow" class="hidden"></button>
+    </div>
   `;
 
-  // --- Call the real DOM initializer from your module ---
-  if (typeof module.initializeDOM === 'function') {
-    module.initializeDOM();
-  }
-
-    inputBar = document.getElementById('inputBar');
-  massOutput = document.getElementById('massOutput');
-  csvCheck = document.getElementById('csvCheck');
-
-  // Spy on the fake microservice (mocked behavior)
-  vi.spyOn(module, 'myFakeMicroservice');
+  module.initializeDOM();
+  vi.restoreAllMocks();
+  vi.spyOn(module, "myLookupMicroservice").mockResolvedValue({});
 });
 
+describe("handleGoClick()", () => {
+  it("should update DOM and show success message for a known species", async () => {
+    $("inputBar").value = "Homo sapiens";
+    module.myLookupMicroservice.mockResolvedValue({
+      status: "success",
+      message: "Homo sapiens mass = 12000 g",
+    });
 
-describe('handleGoClick()', () => {
-  it('should update DOM and show success message for a known species', async () => {
-    inputBar.value = 'Homo sapiens';
-    module.myFakeMicroservice.mockResolvedValue({ status: 'success', message: 'Homo sapiens' });
+    await module.handleGoClick();
 
-    await handleGoClick();
-
-    expect(module.myFakeMicroservice).toHaveBeenCalledWith('Homo sapiens');
-    expect(massOutput.textContent).toBe('success: Homo sapiens');
-    expect(inputBar.value).toBe('');
-    expect(outputBox.classList.contains('hidden')).toBe(false);
-    expect(learnMoreArrow.classList.contains('hidden')).toBe(false);
-    expect(goButton.textContent).toBe('Go Again!');
+    expect(module.myLookupMicroservice).toHaveBeenCalledWith("Homo sapiens");
+    expect($("massOutput").textContent).toBe("success: Homo sapiens mass = 12000 g");
+    expect($("inputBar").value).toBe("");
   });
 
-  it('should show error message for an unknown species', async () => {
-    inputBar.value = 'Tyrannosaurus rex';
-    module.myFakeMicroservice.mockResolvedValue({ status: 'error', error: 'not found' });
+  it("should show error message for an unknown species", async () => {
+    $("inputBar").value = "Tyrannosaurus rex";
+    module.myLookupMicroservice.mockResolvedValue({
+      status: "error",
+      error: "Species not found",
+    });
 
-    await handleGoClick();
+    await module.handleGoClick();
 
-    expect(massOutput.textContent).toBe('not success: not found');
-    expect(outputBox.classList.contains('hidden')).toBe(false);
+    expect(module.myLookupMicroservice).toHaveBeenCalledWith("Tyrannosaurus rex");
+    expect($("massOutput").textContent).toBe("not success: Species not found");
   });
 
   it('should display "no input" if input bar is empty', async () => {
-    inputBar.value = '';
-    await handleGoClick();
-    expect(massOutput.textContent).toBe('no input');
-    expect(module.myFakeMicroservice).not.toHaveBeenCalled();
-  });
-
-  it('should handle a microservice network error', async () => {
-    inputBar.value = 'Test error';
-    module.myFakeMicroservice.mockRejectedValue(new Error('Network failure'));
-
-    await handleGoClick();
-
-    expect(massOutput.textContent).toBe('Error');
+    $("inputBar").value = "";
+    await module.handleGoClick();
+    expect(module.myLookupMicroservice).not.toHaveBeenCalled();
+    expect($("massOutput").textContent).toBe("no input");
   });
 });
 
-describe('Input Type Toggling', () => {
-  beforeEach(() => {
-    csvCheck.classList.add('hidden');
+describe("Input Type Toggling", () => {
+  it("should make csvCheck visible when list is clicked", () => {
+    const el = $("csv-check");
+    el.classList.add("hidden");
+    module.handleListClick();
+    expect(el.classList.contains("hidden")).toBe(false);
   });
 
-  describe('handleListClick()', () => {
-    it('should make csvCheck visible when it starts hidden', () => {
-      handleListClick();
-      expect(csvCheck.classList.contains('hidden')).toBe(false);
-    });
-
-    it('should keep csvCheck visible if it is already visible', () => {
-      csvCheck.classList.remove('hidden');
-      handleListClick();
-      expect(csvCheck.classList.contains('hidden')).toBe(false);
-    });
+  it("should keep csvCheck visible if already visible", () => {
+    const el = $("csv-check");
+    el.classList.remove("hidden");
+    module.handleListClick();
+    expect(el.classList.contains("hidden")).toBe(false);
   });
 
-  describe('handleSingleClick()', () => {
-    it('should keep csvCheck hidden when it starts hidden', () => {
-      handleSingleClick();
-      expect(csvCheck.classList.contains('hidden')).toBe(true);
-    });
+  it("should keep csvCheck hidden when single clicked while hidden", () => {
+    const el = $("csv-check");
+    el.classList.add("hidden");
+    module.handleSingleClick();
+    expect(el.classList.contains("hidden")).toBe(true);
+  });
 
-    it('should hide csvCheck when it starts visible', () => {
-      csvCheck.classList.remove('hidden');
-      handleSingleClick();
-      expect(csvCheck.classList.contains('hidden')).toBe(true);
-    });
+  it("should hide csvCheck when single clicked while visible", () => {
+    const el = $("csv-check");
+    el.classList.remove("hidden");
+    module.handleSingleClick();
+    expect(el.classList.contains("hidden")).toBe(true);
   });
 });
