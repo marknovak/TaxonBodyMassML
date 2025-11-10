@@ -44,6 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           #FILTER_REGEX_INCLUDE: ^src/
           VALIDATE_ALL_CODEBASE: false
+          FIX_JAVASCRIPT_PRETTIER: true
 
       - name: Check formatting
         run: black --check .
