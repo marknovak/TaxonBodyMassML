@@ -15,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # read the raw bodymass data into a dataframe
-df = pd.read_csv("./data/BodyMass.csv")
+df = pd.read_csv("../data/BodyMass.csv")
 print(df)
 
 
