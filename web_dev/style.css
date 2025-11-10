@@ -23,7 +23,7 @@ ul li a:hover {
   background-color: #111111;
 }
 
-#onRight {
+#on-right {
   float: right;
 }
 
@@ -34,13 +34,13 @@ ul li a:hover {
   z-index: 9999;
 }
 
-#closeIntro {
+#close-intro {
   position: absolute;
   right: 0;
   top: 0;
 }
 
-#introBox {
+#intro-box {
   position: fixed;
   border: 2px solid black;
   width: 50%;
@@ -58,7 +58,7 @@ ul li a:hover {
 
 /* Input Box */
 
-#inputBox {
+#input-box {
   text-align: center;
   border: 2px solid black;
   position: fixed;
@@ -68,7 +68,7 @@ ul li a:hover {
   height: 30%;
 }
 
-#inputBox.moved {
+#input-box.moved {
   left: 17.5%;
 }
 
@@ -77,17 +77,17 @@ ul li a:hover {
   margin: 2px;
 }
 
-#inputBar {
+#input-bar {
   margin: 10px;
 }
 
-#goButton {
+#go-button {
   margin: 10px;
 }
 
 /* Output Box */
 
-#outputBox {
+#output-box {
   text-align: center;
   width: 30%;
   height: 30%;
@@ -97,11 +97,11 @@ ul li a:hover {
   right: 17.5%;
 }
 
-#outputBox.moved {
+#output-box.moved {
   left: 17.5%;
 }
 
-#massOutput {
+#mass-output {
   height: 50%;
   width: 46.75%;
   margin: 3.5px;
@@ -109,7 +109,7 @@ ul li a:hover {
   border: 2px solid black;
 }
 
-#confidenceOutput {
+#confidence-output {
   height: 50%;
   width: 46.75%;
   margin: 3.5px;
@@ -117,17 +117,17 @@ ul li a:hover {
   border: 2px solid black;
 }
 
-#learnMoreArrow {
+#learn-more-arrow {
   margin: 10px;
 }
 
-#goBackButton {
+#go-back-button {
   margin: 10px;
 }
 
 /* Explanation Modal */
 
-#explanationModal {
+#explanation-modal {
   text-align: center;
   border: 2px solid black;
   height: 70%;

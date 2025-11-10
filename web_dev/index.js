@@ -1,19 +1,19 @@
 //variable declarations: gets every element by it's unique ID
-var goButton = document.getElementById("goButton");
-var inputBar = document.getElementById("inputBar");
-var inputBox = document.getElementById("inputBox");
-var singleButton = document.getElementById("singleButton");
-var listButton = document.getElementById("listButton");
-var singleOrList = document.getElementById("singleOrList");
-var csvCheck = document.getElementById("csvCheck");
-var outputBox = document.getElementById("outputBox");
-var massOutput = document.getElementById("massOutput");
-var confidenceOutput = document.getElementById("confidenceOutput");
-var learnMoreArrow = document.getElementById("learnMoreArrow");
-var explanationModal = document.getElementById("explanationModal");
-var goBackButton = document.getElementById("goBackButton");
-var introBox = document.getElementById("introBox");
-var closeIntro = document.getElementById("closeIntro");
+var goButton = document.getElementById("go-button");
+var inputBar = document.getElementById("input-bar");
+var inputBox = document.getElementById("input-box");
+var singleButton = document.getElementById("single-button");
+var listButton = document.getElementById("list-button");
+var singleOrList = document.getElementById("single-or-list");
+var csvCheck = document.getElementById("csv-check");
+var outputBox = document.getElementById("outputbox");
+var massOutput = document.getElementById("mass-output");
+var confidenceOutput = document.getElementById("confidence-output");
+var learnMoreArrow = document.getElementById("learn-more-arrow");
+var explanationModal = document.getElementById("explanation-modal");
+var goBackButton = document.getElementById("go-back-button");
+var introBox = document.getElementById("intro-box");
+var closeIntro = document.getElementById("close-intro");
 
 //function definitions
 

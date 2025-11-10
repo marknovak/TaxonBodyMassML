@@ -10,29 +10,29 @@
       <li><a href="./index.html">Design Plan</a></li>
       <li><a href="./data_visualization.html">Data Visualization</a></li>
       <li><a href="./citations.html">Citations</a></li>
-      <li id="onRight"><a href="./help_page.html">Help</a></li>
+      <li id="on-right"><a href="./help_page.html">Help</a></li>
     </ul>
 
     <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
-    <div id="introBox" class="overlay">
+    <div id="intro-box" class="overlay">
       <p>
         Welcome to *insert website name*, to predict a species mass, input the
         name and press go! For additional help, access th e 'Help' page from the
         upper righthand corner
       </p>
-      <button id="closeIntro">X</button>
+      <button id="close-intro">X</button>
     </div>
 
     <!-- Main box containing input bar for users -->
-    <div id="inputBox">
+    <div id="input-box">
       <input type="text" id="inputBar" placeholder="Input species name(s)..." />
-      <div id="singleOrList">
-        <button id="singleButton">Single</button>
-        <button id="listButton">List</button>
+      <div id="single-or-list">
+        <button id="single-button">Single</button>
+        <button id="list-button">List</button>
       </div>
 
       <!-- only visible when 'list' is selected -->
-      <div id="csvCheck" class="hidden">
+      <div id="csv-check" class="hidden">
         <label>
           <input type="checkbox" />
           Convert output to .csv file?
@@ -44,29 +44,29 @@
       </div>
 
       <!-- click to generate output -->
-      <button id="goButton">Go!</button>
+      <button id="go-button">Go!</button>
     </div>
 
     <!-- Main box containing output: mass and confidence interval -->
     <!-- Is only visible after user clicks go -->
-    <div id="outputBox" class="hidden">
-      <div id="massOutput"></div>
+    <div id="output-box" class="hidden">
+      <div id="mass-output"></div>
 
-      <div id="confidenceOutput">
+      <div id="confidence-output">
         <p>Confidence Output</p>
       </div>
 
       <!-- expands explanation modal -->
       <!-- clicking this button hides input box -->
-      <button id="learnMoreArrow" class="hidden">Learn More?</button>
+      <button id="learn-more-arrow" class="hidden">Learn More?</button>
 
       <!-- Only visible after explanation modal is expanded -->
-      <button id="goBackButton" class="hidden">Go Back</button>
+      <button id="go-back-button" class="hidden">Go Back</button>
     </div>
 
     <!-- Box with information about how mass was reached -->
     <!-- Is only visible after learn more arrow is clicked -->
-    <div id="explanationModal" class="hidden">
+    <div id="explanation-modal" class="hidden">
       <p>Explanation Modal</p>
     </div>
   </body>
