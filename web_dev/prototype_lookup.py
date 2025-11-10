@@ -1,11 +1,19 @@
+"""
+prototype_lookup.py
+-------------------
+Provides API endpoints for prototype lookup operations in the web development module.
+single_species endpoint receives an input of 
+"""
+import os
 import pandas as pd
-import matplotlib.pyplot as plt
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
+
+app = Flask(__name__)
+CORS(app)
 
 # read the raw bodymass data into a dataframe
-df = pd.read_csv("../data/BodyMass.csv")
+df = pd.read_csv("./data/BodyMass.csv")
 print(df)
 
 
@@ -28,13 +36,15 @@ df["species_name"] = taxon
 
 print(df)
 
-app = Flask(__name__)
-CORS(app)
 
 
-# receive a request for a mass of a single species from webapp backend
 @app.route("/single_species", methods=["GET"])
 def single_species():
+    """
+    single_species()
+    -------------------
+    receive a request for a mass of a single species from webapp backend
+    """
     species_name = request.args.get("species_name")
 
     # if there is no input species name, then return an error
