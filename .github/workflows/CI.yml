@@ -1,0 +1,56 @@
+#basic actions workflow to check for syntax errors and make sure it passes tests (tests not implemented yet)
+
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  checks: write
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches the entire history
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 pytest
+
+      - name: Lint
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+      - name:
+          Super-Linter
+          # You may pin to the exact commit or the version.
+          # uses: super-linter/super-linter@b92721f792f381cedc002ecdbb9847a15ece5bb8
+        uses: super-linter/super-linter@v7.1.0
+        env:
+          # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #FILTER_REGEX_INCLUDE: ^src/
+          VALIDATE_ALL_CODEBASE: false
+
+      - name: Check formatting
+        run: black --check .
+
+      - name: Run tests
+        run: |
+          if [ -d "tests" ]; then
+            pytest -q
+          else
+            echo "No tests implemented yet."
+          fi
