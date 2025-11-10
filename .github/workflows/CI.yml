@@ -48,7 +48,7 @@ jobs:
           FIX_JAVASCRIPT_PRETTIER: true
           FIX_HTML_PRETTIER: true
           VALIDATE_JSCPD: false
-          #VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
 
       - name: Check formatting
         run: black --check .
