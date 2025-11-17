@@ -24,19 +24,32 @@ print("Number of missing values in each column:\n", df.isna().sum())
 df = df.dropna()
 print(df)
 
-# save taxon column as a list and parse it such that it's only the species name
-taxon = df["taxon"].to_list()
-taxon_len = len(taxon)
-for i in range(taxon_len):
-    # print(taxon[i])
-    for j in range(len(taxon[i])):
-        if taxon[i][j] == "_":
-            taxon[i] = taxon[i][j + 1 :]
-            # print(taxon[i])
-            break
-# save this updated list as a new column
-df["species_name"] = taxon
 
+def parse_dataset(dataframe):
+    """
+    parse_dataset()
+    -------------------
+    isolate species name from genus, remove all unnecessary
+    underscores, and make every species name lowercase
+    """
+    # save taxon column as a list and parse it such that it's only the species name
+    taxon = dataframe["taxon"].to_list()
+    taxon_len = len(taxon)
+    for i in range(taxon_len):
+        # print(taxon[i])
+        taxon[i] = taxon[i].lower()  # convert species name to lowercase
+        for j in range(len(taxon[i])):
+            if taxon[i][j] == "_":
+                taxon[i] = taxon[i][j + 1 :]
+                # print(taxon[i])
+                break
+    # save this updated list as a new column
+    dataframe["species_name"] = taxon
+    return dataframe
+
+
+# prepare species data for lookup operations
+df = parse_dataset(df)
 print(df)
 
 
@@ -47,7 +60,7 @@ def single_species():
     -------------------
     receive a request for a mass of a single species from webapp backend
     """
-    species_name = request.args.get("species_name")
+    species_name = request.args.get("species_name").lower()
 
     # if there is no input species name, then return an error
     if not species_name:
@@ -69,4 +82,4 @@ def single_species():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # use Render's assigned port
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
