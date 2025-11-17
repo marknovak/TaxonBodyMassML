@@ -15,8 +15,8 @@ const closeIntro = document.getElementById('close-intro')
 
 // function definitions
 
-// handleGoCick : makes output box visible and generates output based on input
-async function handleGoClick (event) {
+// makes output box visible and generates output based on input
+const handleGoClick = async (event) => {
   inputBox.classList.add('moved')
   goButton.textContent = 'Go Again!'
   if (outputBox.classList.contains('hidden')) {
@@ -51,7 +51,7 @@ async function handleGoClick (event) {
 }
 
 // uses render to interact with the microservice
-async function myLookupMicroservice (query) {
+const myLookupMicroservice = async (query) => {
   const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
 
   try {
@@ -73,21 +73,21 @@ async function myLookupMicroservice (query) {
 }
 
 // reveals the csv checkbox
-function handleListClick (event) {
+const handleListClick = (event) => {
   if (csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
   }
 }
 
 // hides the csv check box
-function handleSingleClick (event) {
+const handleSingleClick = (event) => {
   if (!csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
   }
 }
 
 // hides the input box and reveals the explanation modal
-function handleLearnMoreClick (event) {
+const handleLearnMoreClick = (event) => {
   outputBox.classList.add('moved')
   learnMoreArrow.classList.toggle('hidden')
   explanationModal.classList.toggle('hidden')
@@ -96,7 +96,7 @@ function handleLearnMoreClick (event) {
 }
 
 // hides the explanation modal and reveals the input box
-function handleGoBackClick (event) {
+const handleGoBackClick = (event) => {
   goBackButton.classList.toggle('hidden')
   outputBox.classList.remove('moved')
   inputBox.classList.toggle('hidden')
@@ -105,7 +105,7 @@ function handleGoBackClick (event) {
 }
 
 // hides the introduction modal
-function handleCloseIntro (event) {
+const handleCloseIntro = (event) => {
   introBox.classList.add('hidden')
 }
 
