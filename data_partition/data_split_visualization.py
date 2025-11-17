@@ -1,26 +1,26 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
-from ydata_profiling import ProfileReport
+#from ydata_profiling import ProfileReport
 import seaborn as sns
 import numpy as np
 from sklearn.preprocessing import PowerTransformer
 
+import matplotlib
 matplotlib.use("TkAgg")
-
+import matplotlib.pyplot as plt
 
 # apply z normalization to the mass_g variable in the data
 def z_normalization(df):
 
     # remove rows with missing data
     print("Number of missing values in each column:\n", df.isna().sum())
-    df = df.dropna()
+    df = df.dropna(subset=["mass_g", "taxon"])
 
     # normalize mass data using z-normalization
-    df["normalized_mass"] = (df["mass_g"] - df["mass_g"].mean()) / df["mass_g"].std()
-    print(df)
+    normalized_df = df.copy()
+    normalized_df["normalized_mass"] = (df["mass_g"] - df["mass_g"].mean()) / df["mass_g"].std()
+    print(normalized_df)
 
-    return df
+    return normalized_df
 
 
 def main():
@@ -31,8 +31,8 @@ def main():
     df = z_normalization(df)
 
     # ydata profiliing report is saved to my_report.html
-    profile = ProfileReport(df, title="Profiling Report")
-    profile.to_file("my_report.html")
+    #profile = ProfileReport(df, title="Profiling Report")
+    #profile.to_file("my_report.html")
 
     # create log1p visualization for the mass_g variable
     sns.histplot(np.log1p(df["mass_g"]), bins=50, kde=True)
@@ -52,7 +52,7 @@ def main():
     plt.show(block=True)
 
     # test data is a random sample of 10% of the database
-    test = df.sample(frac=0.1, replace=False)
+    test = df.sample(frac=0.1, replace=False, random_state=123)
 
     # train data is the remaining 90%
     train = df.drop(test.index)
@@ -64,5 +64,5 @@ def main():
     test.to_csv("./data/test.csv", index=False)
     train.to_csv("./data/train.csv", index=False)
 
-
-main()
+if __name__ == "__main__":
+    main()
