@@ -1,37 +1,70 @@
 /* Nav Bar */
-ul {
-  list-style-type: none;
-  margin: 0;
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #333;
   padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-ul li {
-  float: left;
-}
-
-ul li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-ul li a:hover {
-  background-color: #111;
+  margin: 0;
+  list-style: none;
 }
 
 #on-right {
-  float: right;
+  margin-left: auto;
+}
+
+.nav-bar > li {
+  position: relative;
+}
+
+.nav-bar > li > a {
+  display: block;
+  padding: 14px 16px;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+}
+
+.nav-bar > li > a:hover {
+  background: #111;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+}
+
+.dropdown-content li a {
+  display: block;
+  padding: 12px 16px;
+  color: black;
+  text-decoration: none;
+}
+
+.dropdown-content li a:hover {
+  background: #eee;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+
+  z-index: 1000;
 }
 
 /* Intro Box */
 
 .overlay {
   position: fixed;
-  z-index: 9999;
+  z-index: 999;
 }
 
 #close-intro {

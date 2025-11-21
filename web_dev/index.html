@@ -7,12 +7,20 @@
   <script src="index.js?v=6" charset="utf-8" defer></script>
   <body>
     <!-- jscpd:ignore-start -->
-    <ul id="nav-bar">
+    <ul class="nav-bar">
       <li><a href="./index.html">Home</a></li>
       <li><a href="./data_visualization.html">Data Visualization</a></li>
-      <li><a href="./citations.html">Citations</a></li>
+
+      <li class="dropdown">
+        <a href="#">More Information</a>
+        <ul class="dropdown-content">
+          <li><a href="./alg.html">The Algorithm</a></li>
+          <li><a href="./citations.html">Citations</a></li>
+        </ul>
+      </li>
+
       <li id="on-right"><a href="./help_page.html">Help</a></li>
-    </ul>
+     </ul>
     <!-- jscpd:ignore-end -->
 
     <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
@@ -33,7 +41,7 @@
         placeholder="Input species name(s)..."
       />
       <div id="single-or-list">
-        <button id="single-button">Single</button>
+        <button id="single-button" class="clicked">Single</button>
         <button id="list-button">List</button>
       </div>
 

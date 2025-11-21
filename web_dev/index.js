@@ -21,8 +21,14 @@ const handleGoClick = async (event) => {
   goButton.textContent = 'Go Again!'
   if (outputBox.classList.contains('hidden')) {
     outputBox.classList.toggle('hidden')
-    learnMoreArrow.classList.toggle('hidden')
   }
+  if (singleButton.classList.contains('clicked')) {
+    learnMoreArrow.classList.remove('hidden')
+  }
+  if (listButton.classList.contains('clicked')) {
+    learnMoreArrow.classList.add('hidden')
+  }
+  
   // if the user clicks go without typing any input
   const userInput = inputBar.value.trim()
   if (!userInput) {
@@ -77,12 +83,24 @@ const handleListClick = (event) => {
   if (csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
   }
+  if (singleButton.classList.contains('clicked')) {
+    singleButton.classList.remove('clicked')
+  }
+  if (!listButton.classList.contains('clicked')) {
+    listButton.classList.add('clicked')
+  }
 }
 
 // hides the csv check box
 const handleSingleClick = (event) => {
   if (!csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
+  }
+  if (!singleButton.classList.contains('clicked')) {
+    singleButton.classList.add('clicked')
+  }
+  if (listButton.classList.contains('clicked')) {
+    listButton.classList.remove('clicked')
   }
 }
 
