@@ -125,6 +125,7 @@ const handleGoBackClick = (event) => {
 // hides the introduction modal
 const handleCloseIntro = (event) => {
   introBox.classList.add('hidden')
+  inputBox.classList.remove('hidden')
 }
 
 // event listener declarations: attaching all functions to their appropriate elements
