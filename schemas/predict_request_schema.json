@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "domain": { "type": "string" },
+    "kingdom": { "type": "string" },
+    "phylum": { "type": "string" },
+    "class": { "type": "string" },
+    "order": { "type": "string" },
+    "family": { "type": "string" },
+    "genus": { "type": "string" },
+    "species": { "type": "string" },
+    "newick_phylogeny": { "type": "string" }
+  }
+}
