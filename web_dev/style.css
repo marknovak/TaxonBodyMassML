@@ -139,6 +139,7 @@
   margin: 3.5px;
   float: left;
   border: 2px solid black;
+  font-size: 18px;
 }
 
 #confidence-output {
