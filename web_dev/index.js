@@ -13,6 +13,19 @@ const goBackButton = document.getElementById('go-back-button')
 const introBox = document.getElementById('intro-box')
 const closeIntro = document.getElementById('close-intro')
 
+//handling session details (refreshing versus changing tabs)
+
+const navigationType = performance.getEntriesByType("navigation")[0].type;
+
+if (navigationType === "reload") {
+  sessionStorage.removeItem('introSeen');
+}
+
+if (sessionStorage.getItem('introSeen') === 'true') {
+  introBox.classList.add('hidden');
+  inputBox.classList.remove('hidden');
+}
+
 // function definitions
 
 // makes output box visible and generates output based on input
@@ -52,8 +65,6 @@ const handleGoClick = async (event) => {
     console.error(error)
     massOutput.textContent = 'Error'
   }
-  // clears input bar
-  inputBar.value = ''
 }
 
 // uses render to interact with the microservice
@@ -126,6 +137,7 @@ const handleGoBackClick = (event) => {
 const handleCloseIntro = (event) => {
   introBox.classList.add('hidden')
   inputBox.classList.remove('hidden')
+  sessionStorage.setItem('introSeen', 'true');
 }
 
 // event listener declarations: attaching all functions to their appropriate elements
