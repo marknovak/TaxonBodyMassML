@@ -5,15 +5,29 @@ const questionsContent = document.getElementById('questions-content')
 
 
 function loadQuestions() {
-    const saved = JSON.parse(localStorage.getItem("questions")) || [];
-    questionsContent.innerHTML = saved
-        .map(q => `<p class="user-question">${q}</p>`)
-        .join("");
+    const saved = JSON.parse(localStorage.getItem("questions") || "[]");
+    questionsContent.innerHTML = "";
+
+    saved.forEach(q => {
+        const record = typeof q === "string" ? { text: q, status: "unanswered" } : q;
+
+        const p = document.createElement("p");
+        p.classList.add("user-question");
+        p.textContent = record.text;
+
+        if (record.status === "unanswered") {
+            const statusLabel = document.createElement("span");
+            statusLabel.classList.add("unanswered");
+            statusLabel.textContent = " - (unanswered)";
+            p.appendChild(statusLabel);
+        }
+	questionsContent.appendChild(p);
+    });
 }
 
-function saveQuestion(question) {
-    const saved = JSON.parse(localStorage.getItem("questions")) || [];
-    saved.push(question);
+function saveQuestion(text) {
+    const saved = JSON.parse(localStorage.getItem("questions") || "[]");
+    saved.push({ text: text, status: "unanswered" });
     localStorage.setItem("questions", JSON.stringify(saved));
 }
 
