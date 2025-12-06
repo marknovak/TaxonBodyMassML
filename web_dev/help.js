@@ -24,8 +24,13 @@ submitQuestion.addEventListener("click", () => {
     const p = document.createElement("p");
     p.classList.add("user-question");
     p.textContent = text;
-    questionsContent.appendChild(p);
 
+    const statusLabel = document.createElement("span");
+    statusLabel.classList.add("unanswered");
+    statusLabel.textContent = "- (unanswered)";
+    p.appendChild(statusLabel)
+
+    questionsContent.appendChild(p);
     saveQuestion(text);
     questionBar.value = "";
 });
