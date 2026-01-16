@@ -8,6 +8,7 @@ OUTPUT_CSV = "./data/BodyMass_with_full_taxonomy.csv"
 GBIF_MATCH_URL = "https://api.gbif.org/v2/species/match"
 
 STARTING_INDEX = 0
+MISSED_SPECIES_PATH = "./data/missed_species.txt"
 
 def gbif_match(name):
     params = {
@@ -24,6 +25,8 @@ taxonomy_fields = [
     "kingdom", "phylum", "class", "order",
     "family", "genus", "species", "confidence"
 ]
+
+missed_species = []
 
 for field in taxonomy_fields:
     if field not in df.columns:
@@ -56,6 +59,13 @@ for i, row in df.iterrows():
 
     except Exception as e:
         print(f"Failed on {name}: {e}")
+        missed_species.append(name)
 
 df.to_csv(OUTPUT_CSV, index=False)
 print(f"Saved: {OUTPUT_CSV}")
+
+missed_species_list = open(MISSED_SPECIES_PATH, "w")
+for species in missed_species:
+    missed_species_list.write(species + "\n")
+print("Total missed species:", len(missed_species))
+print("List of missed species has been saved to:", MISSED_SPECIES_PATH)
