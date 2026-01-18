@@ -2,6 +2,7 @@
 const goButton = document.getElementById('go-button')
 const inputBar = document.getElementById('input-bar')
 const inputBox = document.getElementById('input-box')
+const singleOrList = document.getElementById('single-or-list')
 const singleButton = document.getElementById('single-button')
 const listButton = document.getElementById('list-button')
 const csvCheck = document.getElementById('csv-check')
@@ -93,6 +94,9 @@ const myLookupMicroservice = async (query) => {
 const handleListClick = (event) => {
   if (csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
+    inputBar.classList.remove('moved')
+    goButton.classList.remove('moved')
+    singleOrList.classList.remove('moved')
   }
   if (singleButton.classList.contains('clicked')) {
     singleButton.classList.remove('clicked')
@@ -106,6 +110,10 @@ const handleListClick = (event) => {
 const handleSingleClick = (event) => {
   if (!csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
+    inputBar.classList.add('moved')
+    goButton.classList.add('moved')
+    singleOrList.classList.add('moved')
+
   }
   if (!singleButton.classList.contains('clicked')) {
     singleButton.classList.add('clicked')

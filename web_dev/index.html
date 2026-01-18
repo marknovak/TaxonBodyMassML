@@ -25,11 +25,12 @@
 
     <!-- Pop-up modal to introduce users to page, can be closed with the "X" button -->
     <div id="intro-box" class="overlay">
-      <p>
-        Welcome to *insert website name*, to predict a species mass, input the
+      <p style= "text-align: center;">
+      Welcome to the TaxonBodyMassML Website! </p><p style= "text-align: center;">To predict a species mass, input the
         name and press go! For additional help, access the 'Help' page from the
-        upper righthand corner
+        upper righthand corner.
       </p>
+      <img id="taxon-graphic" src="TaxonBodyMassML.png" alt= "animal silhouettes graphic"></img>
       <button id="close-intro">X</button>
     </div>
 
@@ -38,9 +39,10 @@
       <input
         type="text"
         id="input-bar"
+	class="moved"
         placeholder="Input species name(s)..."
       />
-      <div id="single-or-list">
+      <div id="single-or-list" class="moved">
         <button id="single-button" class="clicked">Single</button>
         <button id="list-button">List</button>
       </div>
@@ -58,7 +60,7 @@
       </div>
 
       <!-- click to generate output -->
-      <button id="go-button">Go!</button>
+      <button id="go-button" class="moved">Go!</button>
     </div>
 
     <!-- Main box containing output: mass and confidence interval -->

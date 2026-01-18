@@ -3,10 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  background: #333;
-  padding: 0;
   margin: 0;
   list-style: none;
+  gap: 2rem;
+  padding: 0;
+  background: white;
+  border: 5px solid #28278c;
 }
 
 #on-right {
@@ -20,13 +22,14 @@
 .nav-bar > li > a {
   display: block;
   padding: 14px 16px;
-  color: white;
+  color: black;
+  font-weight: bolder;
   text-decoration: none;
   text-align: center;
 }
 
 .nav-bar > li > a:hover {
-  background: #111;
+  background: #dadef7;
 }
 
 .dropdown-content {
@@ -34,13 +37,14 @@
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 160px;
+  min-width: 187px;
   background: white;
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
   list-style: none;
   padding: 0;
   margin: 0;
   z-index: 10;
+  font-weight: bolder;
 }
 
 .dropdown-content li a {
@@ -51,7 +55,7 @@
 }
 
 .dropdown-content li a:hover {
-  background: #eee;
+  background: #dadef7;
 }
 
 .dropdown:hover .dropdown-content {
@@ -68,18 +72,40 @@
 
 #close-intro {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 10px;
+  top: 10px;
+  background: none;
+  color: #28278c;
+  border: none;
+  font-weight: bolder;
+}
+
+#close-intro:hover {
+  right: 8px;
+  top: 8px;
+  border: 3px solid #28278c;
+  border-radius: 5px;
 }
 
 #intro-box {
   position: fixed;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 20px;
   width: 50%;
   height: 50%;
   left: 25%;
   top: 25%;
   background-color: white;
+  padding: 5px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+#taxon-graphic {
+  position: absolute;
+  width: 80%;
+  height: auto;
+  bottom: 10%;
+  left: 10%;
 }
 
 /* Classes */
@@ -88,20 +114,31 @@
   display: none !important;
 }
 
+.clicked {
+  background: #dadef7 !important;
+  font-weight: bold !important;
+  border: 3px solid #28278c !important;
+}
+
 /* Input Box */
 
 #input-box {
   text-align: center;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   position: fixed;
-  top: 32.5%;
-  left: 32.5%;
+  top: 35%;
+  left: 35%;
   width: 30%;
   height: 30%;
 }
 
 #input-box.moved {
   left: 17.5%;
+}
+
+#csv-check {
+  margin-top: 5px;
 }
 
 #note {
@@ -111,10 +148,41 @@
 
 #input-bar {
   margin: 10px;
+  border: 2px solid #28278c;
+}
+
+#input-bar.moved {
+  position: relative;
+  top: 15%;
 }
 
 #go-button {
   margin: 10px;
+  background: white;
+}
+
+#go-button.moved {
+  position: relative;
+  top: 15%;
+}
+
+#single-or-list.moved {
+  position: relative;
+  top: 15%;
+}
+
+#single-button {
+  border: 2px solid #28278c;
+  border-radius: 5px;
+  color: #28278c;
+  background: white;
+}
+
+#list-button {
+  border: 2px solid #28278c;
+  border-radius: 5px;
+  color: #28278c;
+  background: white;
 }
 
 /* Output Box */
@@ -123,9 +191,10 @@
   text-align: center;
   width: 30%;
   height: 30%;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   position: fixed;
-  top: 32.5%;
+  top: 35%;
   right: 17.5%;
 }
 
@@ -162,7 +231,8 @@
 
 #explanation-modal {
   text-align: center;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   height: 70%;
   width: 30%;
   position: fixed;
