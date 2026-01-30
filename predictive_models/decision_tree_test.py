@@ -5,44 +5,72 @@ Created on Sun Nov 23 16:38:44 2025
 @author: IonCa
 """
 
-from sklearn import tree
-from sklearn.tree import DecisionTreeClassifier
+
+import xgboost as xgb
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import mean_squared_error, r2_score
 
 #import training and testing data
 train = pd.read_csv("./data/train.csv")
 test = pd.read_csv("./data/test.csv")
 
-print("The Training Data is\n", train)
-print("The Testing Data is\n", test)
+print("The Training Data is\n", train.head())
+print("The Testing Data is\n", test.head())
 
 #needs to remove other data when full taxonomy is created
 # keep and remove labels from training and test data
-train_mass = train["mass_g"]
-train = train.drop(["mass_g"], axis=1)
+y_train = train["mass_g"]
+x_train = train.drop(["mass_g"], axis=1)
 
-test_mass = ["mass_g"]
-test = test.drop(["mass_g"], axis=1)
+y_test = test["mass_g"]
+x_test = test.drop(["mass_g"], axis=1)
+
+combined = pd.concat([x_train, x_test], axis=0)
+
+for col in combined.columns:
+    if combined[col].dtype == "object":
+
+        combined[col] = combined[col].astype("category")
+        
+x_train = combined.iloc[:len(x_train)].copy()
+x_test = combined.iloc[len(x_train):].copy()
+
+model = xgb.XGBRegressor(
+    objective="reg:squarederror",
+    n_estimators=300,
+    max_depth=6,
+    learning_rate=0.05,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    enable_categorical=True,
+    random_state=42
+)
+
+model.fit(x_train, y_train)
+
+y_pred = model.predict(x_test)
+
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+
+print("RMSE:", rmse)
+print("R2 Score:", r2)
 
 
-decision_tree = DecisionTreeClassifier()
-decision_tree = decision_tree.fit(train, train_mass)
+# Plot predicted vs actual
+plt.scatter(y_test, y_pred)
+plt.xlabel("Actual Mass (g)")
+plt.ylabel("Predicted Mass (g)")
+plt.title("XGBoost: Actual vs Predicted")
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         "--")
 
-
-##Tree Plot Option 1
-MyPlot=tree.plot_tree(decision_tree,
-                   feature_names=train.columns, 
-                   class_names=decision_tree.classes_,
-                   filled=True)
-
-plt.savefig("mass_tree.jpg")
-plt.close()
-
-## Predict the Testing Dataset
-test_prediction=decision_tree.predict(test_mass)
-print(test_prediction)
+plt.savefig("xgboost_mass_prediction.png")
+plt.show()
 
