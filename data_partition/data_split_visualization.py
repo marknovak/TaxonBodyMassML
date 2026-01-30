@@ -47,33 +47,38 @@ def main():
     It samples 10% of the data as test data and saves new test/train data.
     """
     # read bodymass data into a pandas dataframe
-    df = pd.read_csv("./data/BodyMass.csv")
+    df = pd.read_csv("./data/BodyMass_with_full_taxonomy.csv")
 
     # create a new variable which is the
     # mass_g variable with z-normalization applied
-    df = z_normalization(df)
+    #df = z_normalization(df)
 
     # ydata profiliing report is saved to my_report.html
-    profile = ProfileReport(df, title="Profiling Report")
-    profile.to_file("my_report.html")
+    #profile = ProfileReport(df, title="Profiling Report")
+    #profile.to_file("my_report.html")
 
     # create log1p visualization for the mass_g variable
-    sns.histplot(np.log1p(df["mass_g"]), bins=50, kde=True)
-    plt.title("Log-Transformed mass_g (log1p)")
-    plt.ylabel("Count")
-    plt.xlabel("Mass (g)")
-    plt.show(block=True)
+    # sns.histplot(np.log1p(df["mass_g"]), bins=50, kde=True)
+    # plt.title("Log-Transformed mass_g (log1p)")
+    # plt.ylabel("Count")
+    # plt.xlabel("Mass (g)")
+    # plt.show(block=True)
 
     # use yeo-johnson method to find a transformation that makes
     # visualizing normalized mass variable readable
-    pt = PowerTransformer(method="yeo-johnson")
-    normalized_mass = df["normalized_mass"].to_numpy()
-    transformed = pt.fit_transform(normalized_mass.reshape(-1, 1))
-    sns.histplot(transformed, bins=50, kde=True)
-    plt.title("Yeo-Johnson Transformed Mass Data")
-    plt.ylabel("Count")
-    plt.xlabel("Z-Normalized Mass")
-    plt.show(block=True)
+    # pt = PowerTransformer(method="yeo-johnson")
+    # normalized_mass = df["normalized_mass"].to_numpy()
+    # transformed = pt.fit_transform(normalized_mass.reshape(-1, 1))
+    # sns.histplot(transformed, bins=50, kde=True)
+    # plt.title("Yeo-Johnson Transformed Mass Data")
+    # plt.ylabel("Count")
+    # plt.xlabel("Z-Normalized Mass")
+    # plt.show(block=True)
+    
+    df = df.drop(["taxon", "source_mass", "n", "confidence", "subspecies", "form"], axis=1)
+    print("Number of missing values in each column:\n", df.isna().sum())
+    df = df.dropna()
+    print(df)
 
     # test data is a random sample of 10% of the database
     test = df.sample(frac=0.1, replace=False)
