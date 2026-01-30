@@ -63,6 +63,7 @@ print("R2 Score:", r2)
 
 
 # Plot predicted vs actual
+plt.loglog()
 plt.scatter(y_test, y_pred)
 plt.xlabel("Actual Mass (g)")
 plt.ylabel("Predicted Mass (g)")
