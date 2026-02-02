@@ -108,6 +108,17 @@
   left: 10%;
 }
 
+/* Tutorial */
+
+#begin-tutorial-button {
+  position: absolute;
+  right: 0;
+}
+
+.tool-tip {
+  max-width: 30%;
+}
+
 /* Classes */
 
 .hidden {

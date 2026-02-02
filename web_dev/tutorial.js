@@ -1,6 +1,5 @@
 const tutorialSegment = document.getElementById('tutorial-segment')
 const tutorialStart = document.getElementById('tutorial-start')
-const beginTutorialButton = document.getElementById('begin-tutorial-button')
 const inputBarTutorial = document.getElementById('input-bar-tutorial')
 const inputBarNext = document.getElementById('input-bar-next')
 const singleTutorial = document.getElementById('single-tutorial')
@@ -24,4 +23,99 @@ const dataNext = document.getElementById('data-next')
 const informationTutorial = document.getElementById('information-tutorial')
 const informationNext = document.getElementById('information-next')
 const helpPageTutorial = document.getElementById('help-page-tutorial')
-// const cancels = document.getElementsByClass('cancel')
+const cancels = document.getElementsByClassName('cancel')
+const toolTips = document.getElementsByClassName('tool-tip')
+
+
+const handleBeginTutorialClick = (event) => {
+  for (var i = 0; i < toolTips.length; i++) {
+    if (!toolTips[i].classList.contains("hidden")) {
+      toolTips[i].classList.add("hidden")
+    }
+  }
+  if (inputBarTutorial.classList.contains("hidden")) {
+    inputBarTutorial.classList.remove("hidden")
+  }
+}
+
+const handleInputNextClick = (event) => {
+  inputBarTutorial.classList.add("hidden")
+  singleTutorial.classList.remove("hidden")
+}
+
+const handleSingleNextClick = (event) => {
+  singleTutorial.classList.add("hidden")
+  listTutorial.classList.remove("hidden")
+}
+
+const handleListNextClick = (event) => {
+  listTutorial.classList.add("hidden")
+  csvCheckTutorial.classList.remove("hidden")
+}
+
+const handleCsvCheckNextClick = (event) => {
+  csvCheckTutorial.classList.add("hidden")
+  goTutorial.classList.remove("hidden")
+}
+
+const handleGoNextClick = (event) => {
+  goTutorial.classList.add("hidden")
+  outputTutorial.classList.remove("hidden")
+}
+
+const handleOutputNextClick = (event) => {
+  outputTutorial.classList.add("hidden")
+  changeInputTutorial.classList.remove("hidden")
+}
+
+const handleChangeInputNextClick = (event) => {
+  changeInputTutorial.classList.add("hidden")
+  goAgainTutorial.classList.remove("hidden")
+}
+
+const handleGoAgainNextClick = (event) => {
+  goAgainTutorial.classList.add("hidden")
+  learnMoreTutorial.classList.remove("hidden")
+}
+
+const handleLearnMoreNextClick = (event) => {
+  learnMoreTutorial.classList.add("hidden")
+  dataTutorial.classList.remove("hidden")
+}
+
+const handleDataNextClick = (event) => {
+  dataTutorial.classList.add("hidden")
+  informationTutorial.classList.remove("hidden")
+}
+
+const handleInformationNextClick = (event) => {
+  informationTutorial.classList.add("hidden")
+  helpPageTutorial.classList.remove("hidden")
+}
+
+const handleExitTutorialClick = (event) => {
+  for (var i = 0; i < toolTips.length; i++) {
+    if (!toolTips[i].classList.contains("hidden")) {
+      toolTips[i].classList.add("hidden")
+    }
+  }
+}
+
+for (let i = 0; i < cancels.length; i++) {
+  cancels[i].addEventListener("click", handleExitTutorialClick)
+}
+
+beginTutorialButton.addEventListener("click", handleBeginTutorialClick)
+
+inputBarNext.addEventListener("click", handleInputNextClick)
+singleNext.addEventListener("click", handleSingleNextClick)
+listNext.addEventListener("click", handleListNextClick)
+csvCheckNext.addEventListener("click", handleCsvCheckNextClick)
+outputNext.addEventListener("click", handleOutputNextClick)
+goNext.addEventListener("click", handleGoNextClick)
+changeInputNext.addEventListener("click", handleChangeInputNextClick)
+goAgainNext.addEventListener("click", handleGoAgainNextClick)
+learnMoreNext.addEventListener("click", handleLearnMoreNextClick)
+dataNext.addEventListener("click", handleDataNextClick)
+informationNext.addEventListener("click", handleInformationNextClick)
+

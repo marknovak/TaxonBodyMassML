@@ -13,6 +13,7 @@ const explanationModal = document.getElementById('explanation-modal')
 const goBackButton = document.getElementById('go-back-button')
 const introBox = document.getElementById('intro-box')
 const closeIntro = document.getElementById('close-intro')
+const beginTutorialButton = document.getElementById('begin-tutorial-button')
 
 //handling session details (refreshing versus changing tabs)
 
@@ -145,7 +146,8 @@ const handleGoBackClick = (event) => {
 const handleCloseIntro = (event) => {
   introBox.classList.add('hidden')
   inputBox.classList.remove('hidden')
-  sessionStorage.setItem('introSeen', 'true');
+  beginTutorialButton.classList.remove('hidden')
+  sessionStorage.setItem('introSeen', 'true')
 }
 
 // event listener declarations: attaching all functions to their appropriate elements
