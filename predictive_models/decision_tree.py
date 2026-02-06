@@ -14,6 +14,8 @@ from sklearn.metrics import mean_squared_error, r2_score
 #import training and testing data
 train = pd.read_csv("./data/train.csv")
 test = pd.read_csv("./data/test.csv")
+
+#convert mass to log10 to avoid rounding error + reduce loss effect of large outliers
 train["mass_g"] = np.log10(train["mass_g"])
 test["mass_g"] = np.log10(test["mass_g"])
 
@@ -40,9 +42,9 @@ x_train = combined.iloc[:len(x_train)].copy()
 x_test = combined.iloc[len(x_train):].copy()
 
 model = xgb.XGBRegressor(
-    objective="reg:squarederror",
-    n_estimators=300,
-    max_depth=6,
+    objective="reg:absoluteerror",
+    n_estimators=700,
+    max_depth=100,
     learning_rate=0.05,
     subsample=0.8,
     colsample_bytree=0.8,
@@ -50,10 +52,12 @@ model = xgb.XGBRegressor(
     random_state=42
 )
 
+
 model.fit(x_train, y_train)
 
 y_pred = model.predict(x_test)
 
+# evaluate in log space
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -63,8 +67,8 @@ print("RMSE:", rmse)
 print("R2 Score:", r2)
 
 # need to convert log10 mass to actual mass
-y_test = np.power(10, y_test)
-y_pred = np.power(10, y_pred)
+y_test = np.pow(10, y_test)
+y_pred = np.pow(10, y_pred)
 
 # Plot predicted vs actual
 plt.loglog()
