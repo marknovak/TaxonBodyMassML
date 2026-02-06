@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Nov 23 16:38:44 2025
-
-@author: IonCa
+pasquang
+pasquang@oregonstate.edu
+2/6/2026
 """
-
 
 import xgboost as xgb
 import pandas as pd
@@ -16,12 +14,15 @@ from sklearn.metrics import mean_squared_error, r2_score
 #import training and testing data
 train = pd.read_csv("./data/train.csv")
 test = pd.read_csv("./data/test.csv")
+train["mass_g"] = np.log10(train["mass_g"])
+test["mass_g"] = np.log10(test["mass_g"])
 
 print("The Training Data is\n", train.head())
 print("The Testing Data is\n", test.head())
 
 #needs to remove other data when full taxonomy is created
 # keep and remove labels from training and test data
+
 y_train = train["mass_g"]
 x_train = train.drop(["mass_g"], axis=1)
 
@@ -61,6 +62,9 @@ r2 = r2_score(y_test, y_pred)
 print("RMSE:", rmse)
 print("R2 Score:", r2)
 
+# need to convert log10 mass to actual mass
+y_test = np.power(10, y_test)
+y_pred = np.power(10, y_pred)
 
 # Plot predicted vs actual
 plt.loglog()
