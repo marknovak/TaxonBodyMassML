@@ -25,7 +25,11 @@ const informationNext = document.getElementById('information-next')
 const helpPageTutorial = document.getElementById('help-page-tutorial')
 const cancels = document.getElementsByClassName('cancel')
 const toolTips = document.getElementsByClassName('tool-tip')
-
+const csvCheckbox = document.getElementById('csv-checkbox')
+const homeButton = document.getElementById('home-button')
+const dataButton = document.getElementById('data-button')
+const infoButton = document.getElementById('info-button')
+const helpButton = document.getElementById('help-button')
 
 const handleBeginTutorialClick = (event) => {
   for (var i = 0; i < toolTips.length; i++) {
@@ -33,14 +37,17 @@ const handleBeginTutorialClick = (event) => {
       toolTips[i].classList.add("hidden")
     }
   }
-  if (inputBarTutorial.classList.contains("hidden")) {
-    inputBarTutorial.classList.remove("hidden")
+  if (singleTutorial.classList.contains("hidden")) {
+    singleTutorial.classList.remove("hidden")
   }
 }
 
 const handleInputNextClick = (event) => {
   inputBarTutorial.classList.add("hidden")
-  singleTutorial.classList.remove("hidden")
+  goTutorial.classList.remove("hidden")
+  csvCheckbox.checked = false
+  singleButton.click()
+  inputBar.value = "Natalus"
 }
 
 const handleSingleNextClick = (event) => {
@@ -51,16 +58,19 @@ const handleSingleNextClick = (event) => {
 const handleListNextClick = (event) => {
   listTutorial.classList.add("hidden")
   csvCheckTutorial.classList.remove("hidden")
+  listButton.click()
 }
 
 const handleCsvCheckNextClick = (event) => {
   csvCheckTutorial.classList.add("hidden")
-  goTutorial.classList.remove("hidden")
+  inputBarTutorial.classList.remove("hidden")
+  csvCheckbox.checked = true
 }
 
 const handleGoNextClick = (event) => {
   goTutorial.classList.add("hidden")
   outputTutorial.classList.remove("hidden")
+  goButton.click()
 }
 
 const handleOutputNextClick = (event) => {
@@ -71,26 +81,34 @@ const handleOutputNextClick = (event) => {
 const handleChangeInputNextClick = (event) => {
   changeInputTutorial.classList.add("hidden")
   goAgainTutorial.classList.remove("hidden")
+  inputBar.value = "Different Species"
 }
 
 const handleGoAgainNextClick = (event) => {
   goAgainTutorial.classList.add("hidden")
   learnMoreTutorial.classList.remove("hidden")
+  goButton.click()
 }
 
 const handleLearnMoreNextClick = (event) => {
   learnMoreTutorial.classList.add("hidden")
   dataTutorial.classList.remove("hidden")
+  learnMoreArrow.click()
+  dataButton.classList.add("tutorial-clicked")
 }
 
 const handleDataNextClick = (event) => {
   dataTutorial.classList.add("hidden")
   informationTutorial.classList.remove("hidden")
+  dataButton.classList.remove("tutorial-clicked")
+  infoButton.classList.add("tutorial-clicked")
 }
 
 const handleInformationNextClick = (event) => {
   informationTutorial.classList.add("hidden")
   helpPageTutorial.classList.remove("hidden")
+  infoButton.classList.remove("tutorial-clicked")
+  helpButton.classList.add("tutorial-clicked")
 }
 
 const handleExitTutorialClick = (event) => {
@@ -99,6 +117,8 @@ const handleExitTutorialClick = (event) => {
       toolTips[i].classList.add("hidden")
     }
   }
+  helpButton.classList.remove("tutorial-clicked")
+  homeButton.click()
 }
 
 for (let i = 0; i < cancels.length; i++) {
