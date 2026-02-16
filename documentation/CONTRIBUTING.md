@@ -8,7 +8,9 @@ All project interactions should allign with the guidelines described in the Oreg
 
 ## Getting Started
 
-List prerequisites, setup steps, environment variables/secrets handling, and how to run the app locally. (Work in progress)
+List prerequisites, setup steps, environment variables/secrets handling, and how to run the app locally.
+
+In order to use our application, there are no prerequisite installations or set-up steps. The site is hosted publically at: https://praterh.github.io/HaileysTaxonBodyMassML/web_dev/index.html
 
 ## Branching & Workflow
 
