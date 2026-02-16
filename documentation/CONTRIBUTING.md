@@ -14,7 +14,9 @@ In order to use our application, there are no prerequisite installations or set-
 
 ## Branching & Workflow
 
-Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch naming, and when to rebase vs. merge. (Work in progress)
+Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch naming, and when to rebase vs. merge.
+
+We employ a GitFlow branching workflow, with each feature being given its own independent branch. For example, the web-dev branch is the only branch to which code for the UI implementation is pushed. Rebasing is often considered good for independent feature branches, but merging is required in any pull request to the main branch; we will adhere to this common practice. 
 
 ## Issues & Planning
 
