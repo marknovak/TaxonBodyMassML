@@ -150,6 +150,17 @@ const handleCloseIntro = (event) => {
   sessionStorage.setItem('introSeen', 'true')
 }
 
+const makeVisibilityIndependent = (event) => {
+  if (introBox.classList.contains('hidden')) {
+  	if (beginTutorialButton.classList.contains('hidden')) {
+      		beginTutorialButton.classList.remove('hidden')
+    	}
+	if (inputBox.classList.contains('hidden')) {
+      		inputBox.classList.remove('hidden')
+    	}
+  }
+}
+
 // event listener declarations: attaching all functions to their appropriate elements
 
 goButton.addEventListener('click', handleGoClick)
@@ -162,3 +173,4 @@ singleButton.addEventListener('click', handleSingleClick)
 learnMoreArrow.addEventListener('click', handleLearnMoreClick)
 goBackButton.addEventListener('click', handleGoBackClick)
 closeIntro.addEventListener('click', handleCloseIntro)
+makeVisibilityIndependent()

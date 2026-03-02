@@ -6,13 +6,19 @@ operations in the web development module.
 """
 
 import os
-
+from more_questions_db import init_db
+from routes.more_questions import questions_bp
 import pandas as pd
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+# added functionality for help page question permanence
+init_db()
+app.register_blueprint(questions_bp)
+
 
 # read the raw bodymass data into a dataframe
 df = pd.read_csv("../data/BodyMass.csv")

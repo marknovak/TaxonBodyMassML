@@ -32,11 +32,27 @@ const infoButton = document.getElementById('info-button')
 const helpButton = document.getElementById('help-button')
 
 const handleBeginTutorialClick = (event) => {
-  for (var i = 0; i < toolTips.length; i++) {
-    if (!toolTips[i].classList.contains("hidden")) {
-      toolTips[i].classList.add("hidden")
-    }
+  for (let i = 0; i < toolTips.length; i++) {
+    toolTips[i].classList.add("hidden")
   }
+
+  if (inputBar) inputBar.value = ""
+  if (csvCheckbox) csvCheckbox.checked = false
+  singleButton.click()
+  
+  if (!explanationModal.classList.contains("hidden")) {
+    goBackButton.click()
+    outputBox.classList.add("hidden")
+    inputBox.classList.remove("moved")
+    goButton.textContent = 'Go!'
+  }
+  
+  if (!outputBox.classList.contains("hidden")) {
+    outputBox.classList.add("hidden")
+    inputBox.classList.remove("moved")
+    goButton.textContent = 'Go!'
+  }
+
   if (singleTutorial.classList.contains("hidden")) {
     singleTutorial.classList.remove("hidden")
   }
@@ -138,4 +154,3 @@ goAgainNext.addEventListener("click", handleGoAgainNextClick)
 learnMoreNext.addEventListener("click", handleLearnMoreNextClick)
 dataNext.addEventListener("click", handleDataNextClick)
 informationNext.addEventListener("click", handleInformationNextClick)
-

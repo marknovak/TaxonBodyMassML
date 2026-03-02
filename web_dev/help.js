@@ -1,57 +1,94 @@
-const questionBar = document.getElementById('question-bar')
-const submitQuestion = document.getElementById('submit-question')
-const questionBarDiv = document.getElementById('question-bar-div')
-const questionsContent = document.getElementById('questions-content')
+// handles js functionality and API request for question permanence
 
+const questionBar = document.getElementById('question-bar');
+const submitQuestion = document.getElementById('submit-question');
+const questionsContent = document.getElementById('questions-content');
 
-function loadQuestions() {
-    const saved = JSON.parse(localStorage.getItem("questions") || "[]");
-    questionsContent.innerHTML = "";
+const API_BASE = "https://haileystaxonbodymassml.onrender.com";
 
-    saved.forEach(q => {
-        const record = typeof q === "string" ? { text: q, status: "unanswered" } : q;
+async function loadQuestions() {
+    try {
+        const res = await fetch(`${API_BASE}/questions`);
 
-        const p = document.createElement("p");
-        p.classList.add("user-question");
-        p.textContent = record.text;
-
-        if (record.status === "unanswered") {
-            const statusLabel = document.createElement("span");
-            statusLabel.classList.add("unanswered");
-            statusLabel.textContent = " - (unanswered)";
-            p.appendChild(statusLabel);
+        if (!res.ok) {
+            throw new Error(`Server error: ${res.status}`);
         }
-	questionsContent.appendChild(p);
-    });
+
+        const questions = await res.json();
+
+        questionsContent.innerHTML = "";
+
+        if (questions.length === 0) {
+            const emptyMsg = document.createElement("p");
+            emptyMsg.textContent = "No questions submitted yet.";
+            emptyMsg.classList.add("no-questions");
+            questionsContent.appendChild(emptyMsg);
+            return;
+        }
+
+        questions.forEach(record => {
+            const p = document.createElement("p");
+            p.classList.add("user-question");
+            p.textContent = record.text;
+
+            if (record.status === "unanswered") {
+                const statusLabel = document.createElement("span");
+                statusLabel.classList.add("unanswered");
+                statusLabel.textContent = " - (unanswered)";
+                p.appendChild(statusLabel);
+            }
+
+            questionsContent.appendChild(p);
+        });
+
+    } catch (error) {
+        console.error("Failed to load questions:", error);
+
+        questionsContent.innerHTML = "";
+        const errorMsg = document.createElement("p");
+        errorMsg.textContent = "Unable to load questions. Please try again later.";
+        errorMsg.classList.add("error-message");
+        questionsContent.appendChild(errorMsg);
+    }
 }
 
-function saveQuestion(text) {
-    const saved = JSON.parse(localStorage.getItem("questions") || "[]");
-    saved.push({ text: text, status: "unanswered" });
-    localStorage.setItem("questions", JSON.stringify(saved));
+async function saveQuestion(text) {
+    try {
+        const res = await fetch(`${API_BASE}/questions`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text })
+        });
+
+        if (!res.ok) {
+            throw new Error(`Server error: ${res.status}`);
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error("Failed to save question:", error);
+        alert("Could not submit question. Please try again.");
+        return false;
+    }
 }
 
-submitQuestion.addEventListener("click", () => {
+submitQuestion.addEventListener("click", async () => {
     const text = questionBar.value.trim();
+
     if (text === "") return;
 
-    const p = document.createElement("p");
-    p.classList.add("user-question");
-    p.textContent = text;
+    const success = await saveQuestion(text);
 
-    const statusLabel = document.createElement("span");
-    statusLabel.classList.add("unanswered");
-    statusLabel.textContent = "- (unanswered)";
-    p.appendChild(statusLabel)
-
-    questionsContent.appendChild(p);
-    saveQuestion(text);
-    questionBar.value = "";
+    if (success) {
+        questionBar.value = "";
+        await loadQuestions();
+    }
 });
 
-loadQuestions();
-
-// to clear saved questions, use 'localStorage.clear()' in the inspect mode console
+document.addEventListener("DOMContentLoaded", loadQuestions);
 
 
 
