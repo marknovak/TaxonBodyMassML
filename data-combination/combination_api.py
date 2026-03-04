@@ -7,6 +7,8 @@ purpose: use gbif taxonomy API to fuzzy match species taxonomy
          to each species in Mark Novak's BodyMass dataset.
 """
 
+# pylint: disable=duplicate-code
+
 import pandas as pd
 import requests
 
@@ -15,7 +17,8 @@ OUTPUT_CSV = "./data/BodyMass_with_full_taxonomy.csv"
 
 GBIF_MATCH_URL = "https://api.gbif.org/v2/species/match"
 
-# use starting index to start from the last saved index in case of interruption/failure
+# use starting index to start from the last saved
+# index in case of interruption/failure
 STARTING_INDEX = 0
 MISSED_SPECIES_PATH = "./data/missed_species.txt"
 
@@ -23,7 +26,8 @@ MISSED_SPECIES_PATH = "./data/missed_species.txt"
 def gbif_match(input_name):
     """
     gbif_match()
-    inputs: input_name is a string which represents the scientific name of target species
+    inputs: input_name is a string which represents
+            the scientific name of target species
     output: returns JSON response from fuzzy match API
     """
     params = {
