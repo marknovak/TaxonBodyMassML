@@ -1,8 +1,19 @@
+"""
+Docstring for missing_values_cross_validation
+contributors: Grant Pasquantonio
+pasquang@oregonstate.edu
+3-4-2026
+purpose: use NCBI API to fill in missing values
+        from first pass of taxonomy dataset
+"""
+
+# pylint: disable=duplicate-code
+
+import time
+import xml.etree.ElementTree as ET
+
 import pandas as pd
 import requests
-import time
-
-import xml.etree.ElementTree as ET
 
 INPUT_CSV = "./data/BodyMass_with_full_taxonomy.csv"
 OUTPUT_CSV = "./data/BodyMass_second_pass.csv"
@@ -19,11 +30,7 @@ def ncbi_match(input_name):
     Get taxonomy lineage from NCBI
     """
 
-    params = {
-        "db": "taxonomy",
-        "term": input_name,
-        "retmode": "json"
-    }
+    params = {"db": "taxonomy", "term": input_name, "retmode": "json"}
 
     r = requests.get(NCBI_ESEARCH, params=params, timeout=10)
 
@@ -39,11 +46,7 @@ def ncbi_match(input_name):
 
     tax_id = id_list[0]
 
-    params = {
-        "db": "taxonomy",
-        "id": tax_id,
-        "retmode": "xml"
-    }
+    params = {"db": "taxonomy", "id": tax_id, "retmode": "xml"}
 
     r = requests.get(NCBI_EFETCH, params=params, timeout=10)
 
@@ -54,9 +57,13 @@ def ncbi_match(input_name):
 
 
 def parse_ncbi_xml(xml_text):
-    
+    """
+    parse_ncbi_xml()
+    inputs: xml_text is an xml object that must be parsed for taxonomy data
+    output: returns taxonomy
+    """
 
-    taxonomy = {}
+    taxons = {}
 
     root = ET.fromstring(xml_text)
 
@@ -68,13 +75,13 @@ def parse_ncbi_xml(xml_text):
             rank = taxon.find("Rank").text.lower()
             name = taxon.find("ScientificName").text
 
-            taxonomy[rank] = name
+            taxons[rank] = name
 
-    species = root.find(".//ScientificName")
-    if species is not None:
-        taxonomy["species"] = species.text
+    species_ = root.find(".//ScientificName")
+    if species_ is not None:
+        taxons["species"] = species_.text
 
-    return taxonomy
+    return taxons
 
 
 df = pd.read_csv(INPUT_CSV)
@@ -86,7 +93,7 @@ taxonomy_fields = [
     "order",
     "family",
     "genus",
-    "species"
+    "species",
 ]
 
 missed_species = []
@@ -97,16 +104,13 @@ for i, row in df.iterrows():
     if i < STARTING_INDEX:
         continue
 
-    missing_fields = [
-        field for field in taxonomy_fields
-        if pd.isna(row[field])
-    ]
+    missing_fields = [field for field in taxonomy_fields if pd.isna(row[field])]  # noqa
 
     if not missing_fields:
         continue
 
     if i % 100 == 0:
-        print("Saving from index:", i)
+        print("Saving taxonomy data from index:", i)
         df.to_csv(OUTPUT_CSV, index=False)
 
     NAME = str(row["taxon"]).strip().replace("_", " ")
@@ -132,9 +136,8 @@ for i, row in df.iterrows():
 
         time.sleep(0.34)
 
-    except Exception as e:
-
-        print("Failed:", NAME, e)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Failed to process {NAME}: {e}")
         missed_species.append(NAME)
 
 

@@ -1,5 +1,14 @@
+"""
+Docstring for missing_values
+contributors: Grant Pasquantonio
+pasquang@oregonstate.edu
+3-4-2026
+purpose: analyze missing values in first pass of taxonomy dataset
+"""
+
 import pandas as pd
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 
 INPUT_FILE_PATH = "./data/BodyMass_with_full_taxonomy.csv"
 OUTPUT_FILE_PATH = "./data/species_missing_order_class.csv"
@@ -26,4 +35,3 @@ df = df[df["order"].notna()]
 print("Number of missing values in each column:")
 print(df.isna().sum())
 print(df)
-
