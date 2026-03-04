@@ -4,25 +4,25 @@ pasquang@oregonstate.edu
 2/6/2026
 """
 
-import xgboost as xgb
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
+import xgboost as xgb
 from sklearn.metrics import mean_squared_error, r2_score
 
-#import training and testing data
+# import training and testing data
 train = pd.read_csv("./data/train.csv")
 test = pd.read_csv("./data/test.csv")
 
-#convert mass to log10 to avoid rounding error + reduce loss effect of large outliers
+# convert mass to log10 to avoid rounding error
+# + reduce loss effect of large outliers
 train["mass_g"] = np.log10(train["mass_g"])
 test["mass_g"] = np.log10(test["mass_g"])
 
 print("The Training Data is\n", train.head())
 print("The Testing Data is\n", test.head())
 
-#needs to remove other data when full taxonomy is created
+# needs to remove other data when full taxonomy is created
 # keep and remove labels from training and test data
 
 y_train = train["mass_g"]
@@ -37,9 +37,9 @@ for col in combined.columns:
     if combined[col].dtype == "object":
 
         combined[col] = combined[col].astype("category")
-        
-x_train = combined.iloc[:len(x_train)].copy()
-x_test = combined.iloc[len(x_train):].copy()
+
+x_train = combined.iloc[: len(x_train)].copy()
+x_test = combined.iloc[len(x_train) :].copy()
 
 model = xgb.XGBRegressor(
     objective="reg:absoluteerror",
@@ -49,7 +49,7 @@ model = xgb.XGBRegressor(
     subsample=0.8,
     colsample_bytree=0.8,
     enable_categorical=True,
-    random_state=42
+    random_state=42,
 )
 
 
@@ -76,10 +76,7 @@ plt.scatter(y_test, y_pred)
 plt.xlabel("Actual Mass (g)")
 plt.ylabel("Predicted Mass (g)")
 plt.title("XGBoost: Actual vs Predicted")
-plt.plot([y_test.min(), y_test.max()],
-         [y_test.min(), y_test.max()],
-         "--")
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "--")
 
 plt.savefig("xgboost_mass_prediction.png")
 plt.show()
-
