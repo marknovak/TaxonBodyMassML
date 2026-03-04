@@ -1,0 +1,150 @@
+/* tutorial css page so style.css doesn't get too cluttered */
+
+#begin-tutorial-button {
+  position: absolute;
+  top: 14%;
+  right: 7px;
+  border: 3px solid #28278c;
+  background: white;
+  font-weight: bold;
+  padding: 10px;
+}
+
+#begin-tutorial-button:hover {
+  background-color: #dadef7 !important;
+  border: 4px solid #28278c;
+}
+
+.tool-tip {
+  background-color: white;
+  margin: 5px;
+  text-align: center;
+  width: 20%;
+  height: 50%;
+  padding: 15px;
+  border: 2px, solid, black;
+  font-size: 20px;
+  z-index: 100000;
+}
+
+.tool-tip button {
+  background-color: white;
+  border: 2px, solid, black;
+}
+
+.tool-tip > button:hover {
+  background-color: #dadef7 !important;
+}
+
+.next-button {
+  position: absolute;
+  width: 20%;
+  left: 16.5%;
+  bottom: 5%;
+}
+
+.cancel {
+  position: absolute;
+  width: 45%;
+  right: 16.5%;
+  bottom: 5%;
+}
+
+.final {
+ left: 27.5% !important;
+}
+
+#single-tutorial {
+  position: absolute;
+  left: 6.25%;
+  top: 25%;
+}
+
+#list-tutorial {
+  position: absolute;
+  left: 6.25%;
+  top: 25%;
+}
+
+#csv-check-tutorial {
+  position: absolute;
+  left: 6.25%;
+  top: 25%;
+}
+
+#input-bar-tutorial {
+  position: absolute;
+  left: 6.25%;
+  top: 25%;
+}
+
+#go-tutorial {
+  position: absolute;
+  left: 6.25%;
+  top: 25%;
+}
+
+#output-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+#change-input-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+#go-again-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+#learn-more-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+#data-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+.tutorial-clicked {
+  background: #dadef7 !important;
+  font-weight: bold !important;
+  border: 3px solid #28278c !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+#information-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+
+#help-page-tutorial {
+  position: absolute;
+  width: 50%;
+  height: 22%;
+  right: 23%;
+  bottom: 2%;
+}
+

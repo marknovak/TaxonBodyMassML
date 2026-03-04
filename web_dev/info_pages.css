@@ -1,0 +1,83 @@
+/* Nav Bar */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  list-style: none;
+  gap: 2rem;
+  padding: 0;
+  background: white;
+  border: 5px solid #28278c;
+}
+
+.on-right {
+  margin-left: auto;
+}
+
+.nav-bar > li {
+  position: relative;
+}
+
+.nav-bar > li > a {
+  display: block;
+  padding: 14px 16px;
+  color: black;
+  font-weight: bolder;
+  text-decoration: none;
+  text-align: center;
+}
+
+.nav-bar > li > a:hover {
+  background: #dadef7;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 187px;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  font-weight: bolder;
+}
+
+.dropdown-content li a {
+  display: block;
+  padding: 12px 16px;
+  color: black;
+  text-decoration: none;
+}
+
+.dropdown-content li a:hover {
+  background: #dadef7;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+  z-index: 1000;
+}
+
+
+/* Help Page */
+
+h5 {
+  font-weight: 600;
+}
+
+.unanswered {
+  color: red;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.answered {
+  color: green;
+  font-weight: bold;
+  margin-left: 8px; 
+}

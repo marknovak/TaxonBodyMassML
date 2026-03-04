@@ -2,18 +2,73 @@
 <html>
   <head>
     <title>TaxonBodyMassML Help Page</title>
-    <link rel="stylesheet" href="style.css?v=2" />
+    <link rel="stylesheet" href="info_pages.css?v=3" />
+    <script src="help.js?v=3" charset="utf-8" defer></script>
   </head>
   <body>
     <!-- jscpd:ignore-start -->
-    <ul>
-      <li><a href="./index.html">Design Plan</a></li>
+    <ul class="nav-bar">
+      <li><a href="./index.html">Home</a></li>
       <li><a href="./data_visualization.html">Data Visualization</a></li>
-      <li><a href="./citations.html">Citations</a></li>
-      <li id="on-right"><a href="./help_page.html">Help</a></li>
-    </ul>
+
+      <li class="dropdown">
+        <a href="#">More Information</a>
+        <ul class="dropdown-content">
+          <li><a href="./alg.html">The Algorithm</a></li>
+          <li><a href="./citations.html">Resources</a></li>
+        </ul>
+      </li>
+
+      <li class="on-right"><a href="./help_page.html">Help</a></li>
+     </ul>
     <!-- jscpd:ignore-end -->
 
-    <!-- eventually this will become a help page to allow users of all technical backgrounds to be able to interact with the site -->
+    <!-- a help page to allow users of all technical backgrounds to be able to interact with the site -->
+
+    <!-- introduction -->
+
+    <h4>Help Page </h4>
+
+    <p> Welcome to TaxonBodyMassML, where our goal is to provide accurate body mass estimations for any species you desire! Below are two example user paths for an idea of how to use our site; if these don't quite answer your questions, there are some Frequently Asked Questions as well. Finally, if you are still struggling with an unanswered query, please type it out in the comment box at the bottom of the page, and a team member will reply with an answer!</p>
+
+    <!-- example user paths -->
+
+    <h5>User Paths</h5>
+
+    <p> 1. I am a student writing a paper for my zoology class about a deep-sea organism; there are no known body mass records for the organism. I stumble across the TaxonBodyMassML website while searching the web for body mass information. I click the 'x' in the upper right-hand corner of the box welcoming me to the website to close it. I click on the input bar that reads "Input species name(s)..." and type in the scientific name of the deep-sea species. The "single" option appears to already be selected, so I click the button that says "Go!". I watch as the output box appears, at first saying "Checking species name...", then reading "Species not found". I realize I made a typo when typing in the species name, so I click on the input bar again, which is still populated with the incorrectly-typed scientific name, fix my mistake, and press the "Go Again!" button. This time, the output box contains a number which is labeled "mass". I am curious about how the website came up with this number, so I click the "Learn More?" button under the mass output and learn about the algorithm and predictive process. When I include this information in my zoology paper, I make sure to say that this is a projected mass, and cite the website I used.</p>
+
+    <!-- FAQs -->
+
+    <h5>FAQs</h5>
+
+    <p>Q: Where is the input bar?
+    <br>A: When you first open the application, there is an introduction modal welcoming you to the website; if you click 'Get Started!' at the bottom of this modal, it will reveal the input bar for you to type into. This input bar should have placeholder text that reads: "Input species name(s)..."</p>
+
+    <p>Q: What sort of input do I supply?
+    <br>A: You will input a scientific species name and, if no match is found, you will be prompted to put in the rest of the creature's taxonomy (domain, kingdom, phylum, class, order, family, genus, and species again)</p>
+
+    <p>Q: What are some examples of inputs I could try?
+    <br>A: Here are a list of scientific species names that have direct matches in our dataset:</p>
+    <ul>
+	    <li> Natalus </li>
+	    <li> Aurantiacus </li>
+	    <li> Poliocephalus </li>
+	    <li> Pilbarensis </li>
+    </ul>
+
+    <p>Q: What does "confidence output" mean in this context?
+    <br>A: The 'Confidence Output' section of the output is describing how "sure" our algorithm is that it made an accurate body weight estimate</p>
+
+    <!-- question input box -->
+
+    <h5>More Questions?</h5>
+
+    <div id = "question-bar-div">
+        <input type="text" id="question-bar" placeholder="Ask us a question!"/>
+	<button id="submit-question">Submit</button>
+	<div id = "questions-content"></div>
+    </div>
+
+
   </body>
 </html>

@@ -1,53 +1,115 @@
 /* Nav Bar */
-ul {
-  list-style-type: none;
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   margin: 0;
+  list-style: none;
+  gap: 2rem;
   padding: 0;
-  overflow: hidden;
-  background-color: #333;
+  background: white;
+  border: 5px solid #28278c;
 }
 
-ul li {
-  float: left;
+.on-right {
+  margin-left: auto;
 }
 
-ul li a {
+.nav-bar > li {
+  position: relative;
+}
+
+.nav-bar > li > a {
   display: block;
-  color: white;
-  text-align: center;
   padding: 14px 16px;
+  color: black;
+  font-weight: bolder;
+  text-decoration: none;
+  text-align: center;
+}
+
+.nav-bar > li > a:hover {
+  background: #dadef7;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 187px;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  font-weight: bolder;
+}
+
+.dropdown-content li a {
+  display: block;
+  padding: 12px 16px;
+  color: black;
   text-decoration: none;
 }
 
-ul li a:hover {
-  background-color: #111;
+.dropdown-content li a:hover {
+  background: #dadef7;
 }
 
-#on-right {
-  float: right;
+.dropdown:hover .dropdown-content {
+  display: block;
+  z-index: 1000;
 }
 
 /* Intro Box */
 
 .overlay {
   position: fixed;
-  z-index: 9999;
+  z-index: 999;
 }
 
 #close-intro {
+  font-size: 20px;
   position: absolute;
-  right: 0;
-  top: 0;
+  width: 40%;
+  right: 30%;
+  bottom: 10px;
+  background: none;
+  color: #28278c;
+  border: 3px solid #28278c;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+#close-intro:hover {
+  right: 30%;
+  bottom: 10px;
+  background-color: #dadef7;
+  font-weight: bolder;
 }
 
 #intro-box {
   position: fixed;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 20px;
   width: 50%;
-  height: 50%;
+  height: 60%;
   left: 25%;
-  top: 25%;
+  top: 20%;
   background-color: white;
+  padding: 5px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+#taxon-graphic {
+  position: absolute;
+  width: 80%;
+  height: auto;
+  bottom: 10%;
+  left: 10%;
+  margin-bottom: 10px;
 }
 
 /* Classes */
@@ -56,20 +118,31 @@ ul li a:hover {
   display: none !important;
 }
 
+.clicked {
+  background: #dadef7 !important;
+  font-weight: bold !important;
+  border: 3px solid #28278c !important;
+}
+
 /* Input Box */
 
 #input-box {
   text-align: center;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   position: fixed;
-  top: 32.5%;
-  left: 32.5%;
+  top: 35%;
+  left: 35%;
   width: 30%;
   height: 30%;
 }
 
 #input-box.moved {
   left: 17.5%;
+}
+
+#csv-check {
+  margin-top: 5px;
 }
 
 #note {
@@ -79,10 +152,49 @@ ul li a:hover {
 
 #input-bar {
   margin: 10px;
+  border: 2px solid #28278c;
+}
+
+#input-bar.moved {
+  position: relative;
+  top: 15%;
 }
 
 #go-button {
   margin: 10px;
+  background: white;
+}
+
+#go-button.moved {
+  position: relative;
+  top: 15%;
+}
+
+#single-or-list.moved {
+  position: relative;
+  top: 15%;
+}
+
+#single-button {
+  border: 2px solid #28278c;
+  border-radius: 5px;
+  color: #28278c;
+  background: white;
+}
+
+#list-button {
+  border: 2px solid #28278c;
+  border-radius: 5px;
+  color: #28278c;
+  background: white;
+}
+
+#single-button:hover {
+  background-color: #dadef7;
+}
+
+#list-button:hover {
+  background-color: #dadef7;
 }
 
 /* Output Box */
@@ -91,9 +203,10 @@ ul li a:hover {
   text-align: center;
   width: 30%;
   height: 30%;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   position: fixed;
-  top: 32.5%;
+  top: 35%;
   right: 17.5%;
 }
 
@@ -107,6 +220,7 @@ ul li a:hover {
   margin: 3.5px;
   float: left;
   border: 2px solid black;
+  font-size: 18px;
 }
 
 #confidence-output {
@@ -129,10 +243,84 @@ ul li a:hover {
 
 #explanation-modal {
   text-align: center;
-  border: 2px solid black;
+  border: 4px solid black;
+  border-radius: 5px;
   height: 70%;
   width: 30%;
   position: fixed;
   top: 15%;
   right: 17.5%;
 }
+
+
+/* Small-screen friendly css */
+
+@media (max-width: 768px) {
+
+  .nav-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 25%;
+    height: 100vh;
+  }
+
+  .nav-bar > li > a {
+    padding: 12px;
+    width: 100%;
+    font-size: 12.5px;
+  }
+
+  #on-right {
+	margin-left: 0%;
+  }
+
+  #intro-box {
+    width: 50%;
+    height: auto;
+    left: 32.5%;
+    top: 32.5%;
+  }
+
+  #input-box {
+    width: 50%;
+    height: auto;
+    left: 32.5%;
+    top: 32.5%;
+    padding-bottom: 20px;
+  }
+
+  #input-box.moved {
+    top: 5%;
+    left: 32.5%;
+  }
+
+  #output-box {
+    width: 50%;
+    height: auto;
+    left: 32.5%;
+    top: 55%;
+  }
+
+  #output-box.moved {
+    top: 10%;
+    left: 32.5%;
+  }
+
+  #mass-output, #confidence-output {
+    width: 90%;
+    height: auto;
+    float: none;
+    margin: 10px auto;
+  }
+
+  #explanation-modal {
+    width: 50%;
+    height: auto;
+    left: 32.5%;
+    top: 60%;
+    padding-bottom: 20px;
+  }
+}
+
+
+

@@ -2,27 +2,48 @@
 const goButton = document.getElementById('go-button')
 const inputBar = document.getElementById('input-bar')
 const inputBox = document.getElementById('input-box')
+const singleOrList = document.getElementById('single-or-list')
 const singleButton = document.getElementById('single-button')
 const listButton = document.getElementById('list-button')
 const csvCheck = document.getElementById('csv-check')
-const outputBox = document.getElementById('outputbox')
+const outputBox = document.getElementById('output-box')
 const massOutput = document.getElementById('mass-output')
 const learnMoreArrow = document.getElementById('learn-more-arrow')
 const explanationModal = document.getElementById('explanation-modal')
 const goBackButton = document.getElementById('go-back-button')
 const introBox = document.getElementById('intro-box')
 const closeIntro = document.getElementById('close-intro')
+const beginTutorialButton = document.getElementById('begin-tutorial-button')
+
+//handling session details (refreshing versus changing tabs)
+
+const navigationType = performance.getEntriesByType("navigation")[0].type;
+
+if (navigationType === "reload") {
+  sessionStorage.removeItem('introSeen');
+}
+
+if (sessionStorage.getItem('introSeen') === 'true') {
+  introBox.classList.add('hidden');
+  inputBox.classList.remove('hidden');
+}
 
 // function definitions
 
-// handleGoCick : makes output box visible and generates output based on input
-async function handleGoClick (event) {
+// makes output box visible and generates output based on input
+const handleGoClick = async (event) => {
   inputBox.classList.add('moved')
   goButton.textContent = 'Go Again!'
   if (outputBox.classList.contains('hidden')) {
     outputBox.classList.toggle('hidden')
-    learnMoreArrow.classList.toggle('hidden')
   }
+  if (singleButton.classList.contains('clicked')) {
+    learnMoreArrow.classList.remove('hidden')
+  }
+  if (listButton.classList.contains('clicked')) {
+    learnMoreArrow.classList.add('hidden')
+  }
+  
   // if the user clicks go without typing any input
   const userInput = inputBar.value.trim()
   if (!userInput) {
@@ -46,12 +67,10 @@ async function handleGoClick (event) {
     console.error(error)
     massOutput.textContent = 'Error'
   }
-  // clears input bar
-  inputBar.value = ''
 }
 
 // uses render to interact with the microservice
-async function myLookupMicroservice (query) {
+const myLookupMicroservice = async (query) => {
   const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
 
   try {
@@ -73,21 +92,40 @@ async function myLookupMicroservice (query) {
 }
 
 // reveals the csv checkbox
-function handleListClick (event) {
+const handleListClick = (event) => {
   if (csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
+    inputBar.classList.remove('moved')
+    goButton.classList.remove('moved')
+    singleOrList.classList.remove('moved')
+  }
+  if (singleButton.classList.contains('clicked')) {
+    singleButton.classList.remove('clicked')
+  }
+  if (!listButton.classList.contains('clicked')) {
+    listButton.classList.add('clicked')
   }
 }
 
 // hides the csv check box
-function handleSingleClick (event) {
+const handleSingleClick = (event) => {
   if (!csvCheck.classList.contains('hidden')) {
     csvCheck.classList.toggle('hidden')
+    inputBar.classList.add('moved')
+    goButton.classList.add('moved')
+    singleOrList.classList.add('moved')
+
+  }
+  if (!singleButton.classList.contains('clicked')) {
+    singleButton.classList.add('clicked')
+  }
+  if (listButton.classList.contains('clicked')) {
+    listButton.classList.remove('clicked')
   }
 }
 
 // hides the input box and reveals the explanation modal
-function handleLearnMoreClick (event) {
+const handleLearnMoreClick = (event) => {
   outputBox.classList.add('moved')
   learnMoreArrow.classList.toggle('hidden')
   explanationModal.classList.toggle('hidden')
@@ -96,7 +134,7 @@ function handleLearnMoreClick (event) {
 }
 
 // hides the explanation modal and reveals the input box
-function handleGoBackClick (event) {
+const handleGoBackClick = (event) => {
   goBackButton.classList.toggle('hidden')
   outputBox.classList.remove('moved')
   inputBox.classList.toggle('hidden')
@@ -105,8 +143,22 @@ function handleGoBackClick (event) {
 }
 
 // hides the introduction modal
-function handleCloseIntro (event) {
+const handleCloseIntro = (event) => {
   introBox.classList.add('hidden')
+  inputBox.classList.remove('hidden')
+  beginTutorialButton.classList.remove('hidden')
+  sessionStorage.setItem('introSeen', 'true')
+}
+
+const makeVisibilityIndependent = (event) => {
+  if (introBox.classList.contains('hidden')) {
+  	if (beginTutorialButton.classList.contains('hidden')) {
+      		beginTutorialButton.classList.remove('hidden')
+    	}
+	if (inputBox.classList.contains('hidden')) {
+      		inputBox.classList.remove('hidden')
+    	}
+  }
 }
 
 // event listener declarations: attaching all functions to their appropriate elements
@@ -121,3 +173,4 @@ singleButton.addEventListener('click', handleSingleClick)
 learnMoreArrow.addEventListener('click', handleLearnMoreClick)
 goBackButton.addEventListener('click', handleGoBackClick)
 closeIntro.addEventListener('click', handleCloseIntro)
+makeVisibilityIndependent()
