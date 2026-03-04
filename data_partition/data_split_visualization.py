@@ -9,12 +9,14 @@ It samples 10% of the data as test data and saves new test/train data.
 """
 
 import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
+
+# import matplotlib.pyplot as plt
+# import numpy as np
 import pandas as pd
-import seaborn as sns
-from sklearn.preprocessing import PowerTransformer
-from ydata_profiling import ProfileReport
+
+# import seaborn as sns
+# from sklearn.preprocessing import PowerTransformer
+# from ydata_profiling import ProfileReport
 
 matplotlib.use("TkAgg")
 
@@ -51,11 +53,11 @@ def main():
 
     # create a new variable which is the
     # mass_g variable with z-normalization applied
-    #df = z_normalization(df)
+    # df = z_normalization(df)
 
     # ydata profiliing report is saved to my_report.html
-    #profile = ProfileReport(df, title="Profiling Report")
-    #profile.to_file("my_report.html")
+    # profile = ProfileReport(df, title="Profiling Report")
+    # profile.to_file("my_report.html")
 
     # create log1p visualization for the mass_g variable
     # sns.histplot(np.log1p(df["mass_g"]), bins=50, kde=True)
@@ -74,8 +76,10 @@ def main():
     # plt.ylabel("Count")
     # plt.xlabel("Z-Normalized Mass")
     # plt.show(block=True)
-    
-    df = df.drop(["taxon", "source_mass", "n", "confidence", "subspecies", "form"], axis=1)
+
+    df = df.drop(
+        ["taxon", "source_mass", "n", "confidence", "subspecies", "form"], axis=1
+    )
     print("Number of missing values in each column:\n", df.isna().sum())
     df = df.dropna()
     print(df)
