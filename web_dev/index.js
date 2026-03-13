@@ -78,12 +78,12 @@ const myLookupMicroservice = async (query) => {
     const lookupResponse = await fetch(lookupURL)
     const lookupData = await lookupResponse.json()
 
-    if (!lookupResponse.ok || !lookupData.taxonomy) {
+    /*if (!lookupResponse.ok || !lookupData.taxonomy) {
       return { status: "error", error: lookupData.error || "Species not found" }
-    }
+    }*/
 
     const taxonomy = lookupData.taxonomy
-    const predictionURL = "https://haileystaxonbodymassml.onrender.com/xgb_pred_single"
+    /* const predictionURL = "https://regression-model.onrender.com/xgb_pred_single"
 
     const predictionResponse = await fetch(predictionURL, {
       method: "POST",
@@ -103,6 +103,19 @@ const myLookupMicroservice = async (query) => {
       status: "success",
       message:
         `${predictionData.taxonomy.species} predicted mass = ${predictionData.prediction.toFixed(2)} g`
+    } */
+
+    if (response.ok && data.taxonomy) {
+
+      const t = data.taxonomy
+      return {
+        status: "success",
+        message:`${t.genus} ${t.species} Family: ${t.family} Order: ${t.order}`
+      }
+
+    } 
+    else {
+      return { status: "error", error: data.error || "Species not found" }
     }
 
   } 
