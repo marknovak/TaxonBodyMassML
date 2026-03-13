@@ -1,14 +1,17 @@
 """
 pasquang
 pasquang@oregonstate.edu
-2/6/2026
+3/12/2026
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+import pickleslicer
 from sklearn.metrics import mean_squared_error, r2_score
+
+MODEL_WRITE_FILE = './regressor_microservice/sliced_model/xgboost_model.pkl'
 
 # import training and testing data
 train = pd.read_csv("./data/train.csv")
@@ -31,20 +34,40 @@ x_train = train.drop(["mass_g"], axis=1)
 y_test = test["mass_g"]
 x_test = test.drop(["mass_g"], axis=1)
 
-combined = pd.concat([x_train, x_test], axis=0)
+def align_categories(train_df, test_df):
+    """
+    This function ensures that both the test and training set contain
+    all unique categories from both sets for each column.
+    It also adds
 
-for col in combined.columns:
-    if combined[col].dtype == "object":
+    Args:
+        train_df (pandas dataframe): _description_
+        test_df (pandas dataframe): _description_
 
-        combined[col] = combined[col].astype("category")
+    Returns:
+        a tuple of the reformatted x_train and x_test with shared categories and UNK added
+    """
+    for col in train_df.select_dtypes(include="object").columns:
+        train_df[col] = train_df[col].astype("category")
+        test_df[col] = test_df[col].astype("category")
 
-x_train = combined.iloc[: len(x_train)].copy()
-x_test = combined.iloc[len(x_train) :].copy()
+        # adds the UNK category and both train and test categories
+        categories = list(set(train_df[col].cat.categories) |
+                          set(list(test_df[col].cat.categories)) |
+                          {"UNK"})
 
+        train_df[col] = train_df[col].cat.set_categories(categories)
+        test_df[col] = test_df[col].cat.set_categories(categories)
+
+    return train_df, test_df
+
+x_train, x_test = align_categories(x_train, x_test)
+
+# define model hyperparameters
 model = xgb.XGBRegressor(
     objective="reg:absoluteerror",
-    n_estimators=700,
-    max_depth=100,
+    n_estimators=600,
+    max_depth=40,
     learning_rate=0.05,
     subsample=0.8,
     colsample_bytree=0.8,
@@ -52,14 +75,13 @@ model = xgb.XGBRegressor(
     random_state=42,
 )
 
-
+# train the model
 model.fit(x_train, y_train)
 
+# evaluate the test set
 y_pred = model.predict(x_test)
 
 # evaluate in log space
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 r2 = r2_score(y_test, y_pred)
 
@@ -80,3 +102,24 @@ plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "--")
 
 plt.savefig("xgboost_mass_prediction.png")
 plt.show()
+
+# Save the model using pickleslicer
+pickleslicer.dump(model, MODEL_WRITE_FILE, max_size=100*1024*1024)
+
+# Test if unknown values will cause the model to crash in eval
+print("\n")
+print("-" * 80)
+print("\n")
+for col in x_train.select_dtypes(include="category").columns:
+    unk_test = x_test.iloc[[0]].copy()
+    unk_test[col] = "UNK"
+    unk_test[col] = pd.Categorical(
+        unk_test[col],
+        categories=x_train[col].cat.categories
+    )
+    print(unk_test)
+    print("Ground Truth Mass:", y_test.iloc[0])
+    pred = model.predict(unk_test)
+    print("Predicted Log Mass:", pred)
+    print("Predicted Mass:", np.pow(10, pred))
+    
