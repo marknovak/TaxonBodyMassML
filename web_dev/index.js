@@ -110,7 +110,7 @@ const myLookupMicroservice = async (query) => {
       const t = lookupData.taxonomy
       return {
         status: "success",
-        message:`${t.genus} ${t.species} Family: ${t.family} Order: ${t.order}`
+        message:`Kingdom: ${t.kingdom}; Phylum: ${t.phylum}; Class: ${t.class}; Order: ${t.order}; Family: ${t.family}`
       }
 
     } 
