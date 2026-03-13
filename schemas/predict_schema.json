@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "species": { "type": "string" },
+    "source": { "type": "string" },
+    "random_forest_mass_g": { "type": "number" },
+    "newick_mass_g": { "type": "number" },
+    "confidence_interval": { "type": "string" },
+    "tree_diagram": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "contentMediaType": "image/png"
+    }
+  }
+}

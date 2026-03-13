@@ -8,11 +8,15 @@ All project interactions should allign with the guidelines described in the Oreg
 
 ## Getting Started
 
-List prerequisites, setup steps, environment variables/secrets handling, and how to run the app locally. (Work in progress)
+List prerequisites, setup steps, environment variables/secrets handling, and how to run the app locally.
+
+In order to use our application, there are no prerequisite installations or set-up steps. The site is hosted publically at: https://praterh.github.io/HaileysTaxonBodyMassML/web_dev/index.html
 
 ## Branching & Workflow
 
-Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch naming, and when to rebase vs. merge. (Work in progress)
+Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch naming, and when to rebase vs. merge.
+
+We employ a GitFlow branching workflow, with each feature being given its own independent branch. For example, the web-dev branch is the only branch to which code for the UI implementation is pushed. Rebasing is often considered good for independent feature branches, but merging is required in any pull request to the main branch; we will adhere to this common practice. 
 
 ## Issues & Planning
 
