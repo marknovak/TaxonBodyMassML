@@ -1,8 +1,5 @@
 import numpy as np
 import pandas as pd
-import xgboost as xgb
-import pickle
-import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
