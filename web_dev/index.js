@@ -71,23 +71,44 @@ const handleGoClick = async (event) => {
 
 // uses render to interact with the microservice
 const myLookupMicroservice = async (query) => {
-  const url = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
+
+  const lookupURL = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
 
   try {
-    const response = await fetch(url)
-    const data = await response.json()
+    const lookupResponse = await fetch(lookupURL)
+    const lookupData = await lookupResponse.json()
 
-    if (response.ok) {
-      return {
-        status: 'success',
-        message: `${data.species_name} mass = ${data.mass_g} g`
-      }
-    } else {
-      return { status: 'error', error: data.error || 'Unknown error' }
+    if (!lookupResponse.ok || !lookupData.taxonomy) {
+      return { status: "error", error: lookupData.error || "Species not found" }
     }
-  } catch (error) {
-    console.error('Network error:', error)
-    return { status: 'error', error: 'Network error' }
+
+    const taxonomy = lookupData.taxonomy
+    const predictionURL = "https://haileystaxonbodymassml.onrender.com/xgb_pred_single"
+
+    const predictionResponse = await fetch(predictionURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(taxonomy)
+    })
+
+    const predictionData = await predictionResponse.json()
+
+    if (!predictionResponse.ok) {
+      return { status: "error", error: "Prediction failed" }
+    }
+
+    return {
+      status: "success",
+      message:
+        `${predictionData.taxonomy.species} predicted mass = ${predictionData.prediction.toFixed(2)} g`
+    }
+
+  } 
+  catch (error) {
+    console.error("Network error:", error)
+    return { status: "error", error: "Network error" }
   }
 }
 
