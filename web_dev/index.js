@@ -72,7 +72,7 @@ const handleGoClick = async (event) => {
 // uses render to interact with the microservice
 const myLookupMicroservice = async (query) => {
 
-  const lookupURL = `https://haileystaxonbodymassml.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
+  const lookupURL = `https://look-up-service.onrender.com/single_species?species_name=${encodeURIComponent(query)}`
 
   try {
     const lookupResponse = await fetch(lookupURL)
