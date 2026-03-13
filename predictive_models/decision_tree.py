@@ -66,8 +66,8 @@ x_train, x_test = align_categories(x_train, x_test)
 # define model hyperparameters
 model = xgb.XGBRegressor(
     objective="reg:absoluteerror",
-    n_estimators=1000,
-    max_depth=50,
+    n_estimators=600,
+    max_depth=40,
     learning_rate=0.05,
     subsample=0.8,
     colsample_bytree=0.8,
