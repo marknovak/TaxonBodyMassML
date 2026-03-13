@@ -7,12 +7,12 @@ pasquang@oregonstate.edu
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-import pickle
+import pickleslicer
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-MODEL_READ_FILE = './regressor_microservice/xgboost_model.pkl'
+MODEL_READ_FILE = './regressor_microservice/sliced_model/xgboost_model.pkl'
 
 def align_categories(train_df, test_df):
     """
@@ -115,8 +115,7 @@ def create_app(loaded_model, x_train):
 
 def main():
     
-    with open(MODEL_READ_FILE, 'rb') as f:
-        loaded_model = pickle.load(f) 
+    loaded_model = pickleslicer.load(MODEL_READ_FILE) 
         
     if not loaded_model:
         print("Model not loaded successfully.")
