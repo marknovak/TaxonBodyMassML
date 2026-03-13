@@ -12,7 +12,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-MODEL_READ_FILE = './regressor_microservice/sliced_model/xgboost_model.pkl'
+MODEL_READ_FILE = './sliced_model/xgboost_model.pkl'
 
 def align_categories(train_df, test_df):
     """
