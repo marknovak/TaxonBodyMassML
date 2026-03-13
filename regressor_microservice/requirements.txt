@@ -5,3 +5,5 @@ matplotlib
 gunicorn
 requests
 xgboost
+pickleslicer
+os
