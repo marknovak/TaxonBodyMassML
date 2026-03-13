@@ -6,4 +6,3 @@ gunicorn
 requests
 xgboost
 pickleslicer
-os
