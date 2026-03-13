@@ -1,7 +1,7 @@
 """
 pasquang
 pasquang@oregonstate.edu
-2/6/2026
+3/12/2026
 """
 
 import matplotlib.pyplot as plt
@@ -10,6 +10,8 @@ import pandas as pd
 import xgboost as xgb
 import pickle
 from sklearn.metrics import mean_squared_error, r2_score
+
+MODEL_WRITE_FILE = './regressor_microservice/xgboost_model.pkl'
 
 # import training and testing data
 train = pd.read_csv("./data/train.csv")
@@ -100,6 +102,10 @@ plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "--")
 
 plt.savefig("xgboost_mass_prediction.png")
 plt.show()
+
+# Save the model using pickle
+with open(MODEL_WRITE_FILE, 'wb') as f:
+    pickle.dump(model, f)
 
 # Test if unknown values will cause the model to crash in eval
 print("\n")
