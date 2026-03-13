@@ -105,9 +105,9 @@ const myLookupMicroservice = async (query) => {
         `${predictionData.taxonomy.species} predicted mass = ${predictionData.prediction.toFixed(2)} g`
     } */
 
-    if (response.ok && data.taxonomy) {
+    if (lookupResponse.ok && lookupData.taxonomy) {
 
-      const t = data.taxonomy
+      const t = lookupData.taxonomy
       return {
         status: "success",
         message:`${t.genus} ${t.species} Family: ${t.family} Order: ${t.order}`
@@ -115,7 +115,7 @@ const myLookupMicroservice = async (query) => {
 
     } 
     else {
-      return { status: "error", error: data.error || "Species not found" }
+      return { status: "error", error: lookupData.error || "Species not found" }
     }
 
   } 
