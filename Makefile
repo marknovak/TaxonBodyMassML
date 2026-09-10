@@ -8,7 +8,7 @@ TUNE_EE   = predictive_models/results/tuning_study_ee.json
 .PHONY: all fetch split \
         tune tune-xgboost tune-gpboost tune-gpboost-parallel tune-ee \
         train train-xgboost train-gpboost train-ee \
-        artifacts clean-tune
+        artifacts publish clean-tune
 
 all: artifacts
 
@@ -59,6 +59,10 @@ train: train-xgboost train-ee
 # ---- Artifact export ----------------------------------------------------------
 artifacts: train
 	python scripts/export_artifacts.py
+
+# ---- Publish to HuggingFace (upload + versioned tag) -------------------------
+publish: artifacts
+	python scripts/publish_artifacts.py
 
 # ---- Discard stale tuning state (re-run after data changes) ------------------
 clean-tune:

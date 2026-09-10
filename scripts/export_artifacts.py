@@ -275,11 +275,9 @@ print(f"  Written to {checksums_path}")
 # 8. Instructions
 # ---------------------------------------------------------------------------
 print("""
-Done. Upload all files in artifacts/ to Hugging Face:
+Done. To publish:
 
-    pip install huggingface_hub
-    huggingface-cli login
-    huggingface-cli upload marknovak/TaxonBodyMassML artifacts/ . --repo-type model
+    make publish          # uploads artifacts/ and creates the r-v<version> HF tag
 
 Then copy the checksums from artifacts/checksums.json into the package
 source files (Python: packages/python/taxonbodymassml/_checksums.py; R:
