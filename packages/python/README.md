@@ -44,19 +44,22 @@ tbm.predict_mass(tax)
 
 ## API
 
-### `predict_mass(species, confidence_interval=False, method="XGBoost", include_taxonomy=False, fuzzy_match_name=False)`
+### `predict_mass(taxon, confidence_interval=False, method="XGBoost", include_taxonomy=False, fuzzy_match_name=False, include_source=False)`
 
-Predict body mass for one or more species.
+Predict body mass for one or more taxa. For taxa whose species-level mass
+appears directly in the training data, the empirical value is returned without
+invoking the model.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `species` | `str`, `list[str]`, or `pd.DataFrame` | Scientific name(s). Pass a DataFrame with resolved taxonomy columns to skip the GBIF/NCBI lookup. |
-| `confidence_interval` | `bool` or `float` | `False`: no interval. `True`: 90% conformal interval. Float in (0, 1): interval at that coverage level. |
+| `taxon` | `str`, `list[str]`, or `pd.DataFrame` | Scientific name(s). Pass a DataFrame with resolved taxonomy columns to skip the GBIF/NCBI lookup. |
+| `confidence_interval` | `bool` or `float` | `False`: no interval. `True`: 90% conformal interval. Float in (0, 1): interval at that coverage level. `NaN` for dictionary-sourced rows. |
 | `method` | `str` | `"XGBoost"` (default). Extensible for future models. |
 | `include_taxonomy` | `bool` | Append resolved taxonomy columns to the output. |
-| `fuzzy_match_name` | `bool` | If `True`, correct species names via the GBIF species-match API before lookup, tolerating misspellings and name variants. Appends a `matched_name` column: the originally entered name when a correction was applied or no match was found; `None` when the name was already canonical. Default `False` (exact matching). Ignored when `species` is a `pd.DataFrame`. |
+| `fuzzy_match_name` | `bool` | If `True`, correct species names via the GBIF species-match API before lookup, tolerating misspellings and name variants. Appends a `matched_name` column: the originally entered name when a correction was applied or no match was found; `None` when the name was already canonical. Default `False` (exact matching). Ignored when `taxon` is a `pd.DataFrame`. |
+| `include_source` | `bool` | If `True`, append a `source` column with the provenance of each mass value: the original source identifier (e.g., `"fishbase"`) for dictionary-sourced values, or `"tbmML_<rank>"` for model-inferred values indicating the finest training-data rank. |
 
-Returns a `pd.DataFrame` with columns `taxon`, `mass_g` (grams), and optionally `lower_bound`, `upper_bound`, `confidence`, `kingdom` … `species_resolved`, `matched_name`.
+Returns a `pd.DataFrame` with columns `taxon`, `mass_g` (grams), and optionally `lower_bound`, `upper_bound`, `confidence`, `kingdom` … `species_resolved`, `matched_name`, `source`.
 
 Species that cannot be resolved to taxonomy emit a warning and return `NaN`.
 

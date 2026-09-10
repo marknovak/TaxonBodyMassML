@@ -3,7 +3,15 @@
 HF_REPO_ID = "marknovak/TaxonBodyMassML"
 
 CHECKSUMS = {
-    "model.ubj": "6f94483f99af5f3792cd602b70735b5f34f3b7329b6cd76bf88ac33775fa4ac8",  # noqa: E501
-    "calibration.json": "931b981419b8950e85be8195b5837855f89716c6f9353c4062ea7fce4a72c6ca",  # noqa: E501
-    "categories.json": "c1db62061c22673bde63b3347246373c4340e3a92d35804df892b1ec9938298d",  # noqa: E501
+    # XGBoost (original method)
+    "model.ubj": "0fdb5d375e6158cd8eed635330f9f06d1d3054af65ee3857ff6890d2e15e94ed",  # noqa: E501
+    "calibration.json": "814fd4dde6421e0509de77d778dfb62f5beab9d129af1744b5f1aa59095bc1bd",  # noqa: E501
+    "calibration_by_rank.json": "dd409f4d0f7e544d36309328c89135d8669539e365bd93076b639e5f8be01280",  # noqa: E501
+    "categories.json": "910394f7a8fa2d4d34b3a559ad170f7d6d4909f9ad88167d3820e6701ca0b377",  # noqa: E501
+    "lookup.json": "ba530ab9b34eb5a0c236fd6c1ebba0e6fa04ec3287011887681146282dd6cd46",  # noqa: E501
+    # Entity Embeddings
+    "embeddings.json": "664206d2ff673a9a86d55893e3b9e77e2291d812322acf362cfce08d6bddd81d",  # noqa: E501
+    "model_ee.ubj": "1ed9cc8a0509be42aade44cb878f40ae71eb33f6a711531db9f750628df163e8",  # noqa: E501
+    "calibration_ee.json": "a43e8dc258f4db18324c340105a65c38a40a8e59373ed21058ca05ead4e366ec",  # noqa: E501
+    "calibration_by_rank_ee.json": "b54e422030f356ab5d50e302e6b635fa878cd3f68583005d593215000dc35841",  # noqa: E501
 }

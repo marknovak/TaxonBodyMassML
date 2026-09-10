@@ -13,7 +13,21 @@ import pandas as pd
 import xgboost as xgb
 
 from ._lookup import TAXONOMY_COLS, lookup_taxonomy
-from ._model import _ensure_artifacts, load_calibration, load_categories, load_model
+from ._model import (
+    _ensure_artifacts,
+    load_calibration,
+    load_calibration_by_rank,
+    load_calibration_by_rank_ee,
+    load_calibration_by_rank_gpboost,
+    load_calibration_ee,
+    load_calibration_gpboost,
+    load_categories,
+    load_embeddings,
+    load_lookup,
+    load_model,
+    load_model_ee,
+    load_model_gpboost,
+)
 
 _TAXONOMY_INPUT_COLS = [
     "kingdom",
@@ -25,10 +39,22 @@ _TAXONOMY_INPUT_COLS = [
     "species_resolved",
 ]
 
+_RANK_ORDER = ["genus", "family", "order", "class", "phylum", "kingdom"]
+
 
 # ---------------------------------------------------------------------------
-# CI level resolver
+# CI level resolver / interval method validator
 # ---------------------------------------------------------------------------
+def _resolve_interval_method(interval_method: str) -> str:
+    valid = {"stratified", "pooled"}
+    if interval_method not in valid:
+        raise ValueError(
+            f"interval_method must be 'stratified' or 'pooled'. "
+            f"Got: {interval_method!r}"  # noqa: E501
+        )
+    return interval_method
+
+
 def _resolve_ci_level(confidence_interval) -> Optional[float]:
     if confidence_interval is False:
         return None
@@ -48,7 +74,7 @@ def _resolve_ci_level(confidence_interval) -> Optional[float]:
 # ---------------------------------------------------------------------------
 def _ascii_normalize(x):
     if pd.isna(x):
-        return x
+        return None
     normalized = unicodedata.normalize("NFKD", str(x))
     return normalized.encode("ascii", "ignore").decode("ascii")
 
@@ -84,6 +110,97 @@ def _apply_unk_mapping(  # noqa: E501
 
 
 # ---------------------------------------------------------------------------
+# Source rank inference for model-inferred rows
+# ---------------------------------------------------------------------------
+def _infer_source_rank(row: pd.Series, categories: dict[str, list[str]]) -> str:
+    for rank in _RANK_ORDER:
+        val = _ascii_normalize(row.get(rank))
+        if val and val != "UNK" and val in set(categories.get(rank, [])):
+            return f"tbmML_{rank}"
+    return "tbmML_UNK"
+
+
+# ---------------------------------------------------------------------------
+# Shared output assembler
+# ---------------------------------------------------------------------------
+def _assemble_output(
+    log_preds: np.ndarray,
+    taxonomy_df: pd.DataFrame,
+    level: Optional[float],
+    residuals: Optional[list[float]],
+    input_names: list[str],
+    include_taxonomy: bool,
+    include_source: bool,
+    interval_method: str = "pooled",
+    by_rank_residuals: Optional[dict] = None,
+) -> pd.DataFrame:
+    """Convert log10 predictions to a result DataFrame with CI/taxonomy/source columns."""  # noqa: E501
+    use_stratified = (
+        level is not None
+        and residuals is not None
+        and len(residuals) > 0
+        and interval_method == "stratified"
+        and by_rank_residuals is not None
+    )
+    need_cats = include_source or use_stratified
+    categories = load_categories() if need_cats else None
+
+    q_pooled = (
+        float(np.quantile(residuals, level))
+        if (level is not None and residuals is not None and len(residuals) > 0)
+        else None
+    )
+
+    rows = []
+    for i, (name, log_pred) in enumerate(zip(input_names, log_preds)):
+        row: dict = {"taxon": name, "mass_g": float(10**log_pred)}
+        src = None
+        if level is not None:
+            if use_stratified:
+                src = _infer_source_rank(taxonomy_df.iloc[i], categories)
+                rank_key = src.replace("tbmML_", "")
+                rank_res = by_rank_residuals.get(rank_key)
+                if rank_res and len(rank_res) >= 10:
+                    q_row = float(np.quantile(rank_res, level))
+                else:
+                    q_row = q_pooled
+                row["lower_bound"] = (
+                    float(10 ** (log_pred - q_row))
+                    if q_row is not None
+                    else float("nan")  # noqa: E501
+                )
+                row["upper_bound"] = (
+                    float(10 ** (log_pred + q_row))
+                    if q_row is not None
+                    else float("nan")  # noqa: E501
+                )
+            else:
+                row["lower_bound"] = (
+                    float(10 ** (log_pred - q_pooled))
+                    if q_pooled is not None
+                    else float("nan")  # noqa: E501
+                )
+                row["upper_bound"] = (
+                    float(10 ** (log_pred + q_pooled))
+                    if q_pooled is not None
+                    else float("nan")  # noqa: E501
+                )
+            row["confidence"] = level
+        if include_taxonomy:
+            for col in _TAXONOMY_INPUT_COLS:
+                row[col] = (
+                    taxonomy_df[col].iloc[i] if col in taxonomy_df.columns else None
+                )  # noqa: E501
+        if include_source:
+            if src is None:
+                src = _infer_source_rank(taxonomy_df.iloc[i], categories)
+            row["source"] = src
+        rows.append(row)
+
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
 # XGBoost predictor
 # ---------------------------------------------------------------------------
 def _predict_xgboost(
@@ -91,33 +208,153 @@ def _predict_xgboost(
     level: Optional[float],
     include_taxonomy: bool,
     input_names: list[str],
+    include_source: bool,
+    interval_method: str = "pooled",
 ) -> pd.DataFrame:
     _ensure_artifacts()
-    model = load_model()
     categories = load_categories()
-
     X = _apply_unk_mapping(taxonomy_df, categories)
     dmat = xgb.DMatrix(X, enable_categorical=True)
-    log_preds = model.predict(dmat)
-
-    rows = []
+    log_preds = load_model().predict(dmat)
     residuals = load_calibration() if level is not None else None
-    q = float(np.quantile(residuals, level)) if residuals is not None else None
+    by_rank = (
+        load_calibration_by_rank()
+        if (level is not None and interval_method == "stratified")
+        else None
+    )
+    return _assemble_output(
+        log_preds,
+        taxonomy_df,
+        level,
+        residuals,
+        input_names,
+        include_taxonomy,
+        include_source,
+        interval_method,
+        by_rank,
+    )
 
-    for i, (name, log_pred) in enumerate(zip(input_names, log_preds)):
-        row: dict = {"taxon": name, "mass_g": float(10**log_pred)}
-        if level is not None:
-            row["lower_bound"] = float(10 ** (log_pred - q))
-            row["upper_bound"] = float(10 ** (log_pred + q))
-            row["confidence"] = level
-        if include_taxonomy:
-            for col in _TAXONOMY_INPUT_COLS:
-                row[col] = (
-                    taxonomy_df[col].iloc[i] if col in taxonomy_df.columns else None
-                )  # noqa: E501
-        rows.append(row)
 
-    return pd.DataFrame(rows)
+# ---------------------------------------------------------------------------
+# GPBoost predictor
+# ---------------------------------------------------------------------------
+def _predict_gpboost(
+    taxonomy_df: pd.DataFrame,
+    level: Optional[float],
+    include_taxonomy: bool,
+    input_names: list[str],
+    include_source: bool,
+    interval_method: str = "pooled",
+) -> pd.DataFrame:
+    try:
+        import gpboost  # noqa: F401, E501 — presence check only; model loaded via load_model_gpboost
+    except ImportError as exc:
+        raise ImportError(
+            "gpboost is required for method='GPBoost'. "
+            "Install it with: pip install gpboost"  # noqa: E501
+        ) from exc
+
+    _ensure_artifacts()
+    categories = load_categories()
+
+    # Fixed-effect feature matrix — same UNK mapping as XGBoost
+    X = _apply_unk_mapping(taxonomy_df, categories)
+
+    # Group data for nested random effects (species→genus→family→order→class)
+    group_cols = ["species_resolved", "genus", "family", "order", "class"]
+    group_data = (
+        taxonomy_df[[c for c in group_cols if c in taxonomy_df.columns]]
+        .fillna("UNK")
+        .astype(str)
+        .to_numpy()
+    )
+
+    booster = load_model_gpboost()
+    log_preds = booster.predict(data=X, group_data_pred=group_data)
+    residuals = load_calibration_gpboost() if level is not None else None
+    by_rank = (
+        load_calibration_by_rank_gpboost()
+        if (level is not None and interval_method == "stratified")
+        else None
+    )
+    return _assemble_output(
+        log_preds,
+        taxonomy_df,
+        level,
+        residuals,
+        input_names,
+        include_taxonomy,
+        include_source,
+        interval_method,
+        by_rank,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Entity Embeddings predictor
+# ---------------------------------------------------------------------------
+_EE_DIMS = {
+    "kingdom": 4,
+    "phylum": 8,
+    "class": 8,
+    "order": 16,
+    "family": 16,
+    "genus": 32,
+    "species": 32,
+}
+_EE_TOTAL_DIM = sum(_EE_DIMS.values())  # 116
+
+
+def _predict_entity_embeddings(
+    taxonomy_df: pd.DataFrame,
+    level: Optional[float],
+    include_taxonomy: bool,
+    input_names: list[str],
+    include_source: bool,
+    interval_method: str = "pooled",
+) -> pd.DataFrame:
+    _ensure_artifacts()
+    embeddings = load_embeddings()
+
+    # Map each taxonomy value to its embedding; unseen values → UNK vector
+    n = len(taxonomy_df)
+    X = np.zeros((n, _EE_TOTAL_DIM), dtype=np.float32)
+    src_col = {"species": "species_resolved"}  # column name remap
+    offset = 0
+    for col in TAXONOMY_COLS:
+        dim = _EE_DIMS[col]
+        col_embs = embeddings[col]
+        unk_vec = np.array(col_embs["UNK"], dtype=np.float32)
+        df_col = src_col.get(col, col)
+        vals = (
+            taxonomy_df[df_col].fillna("UNK")
+            if df_col in taxonomy_df.columns
+            else pd.Series(["UNK"] * n)
+        )
+        for i, val in enumerate(vals):
+            norm = _ascii_normalize(val) or "UNK"
+            X[i, offset : offset + dim] = col_embs.get(norm, unk_vec)
+        offset += dim
+
+    dmat = xgb.DMatrix(X)
+    log_preds = load_model_ee().predict(dmat)
+    residuals = load_calibration_ee() if level is not None else None
+    by_rank = (
+        load_calibration_by_rank_ee()
+        if (level is not None and interval_method == "stratified")
+        else None
+    )
+    return _assemble_output(
+        log_preds,
+        taxonomy_df,
+        level,
+        residuals,
+        input_names,
+        include_taxonomy,
+        include_source,
+        interval_method,
+        by_rank,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +362,8 @@ def _predict_xgboost(
 # ---------------------------------------------------------------------------
 _METHODS = {
     "XGBoost": _predict_xgboost,
+    "GPBoost": _predict_gpboost,
+    "EntityEmbeddings": _predict_entity_embeddings,
 }
 
 
@@ -132,17 +371,20 @@ _METHODS = {
 # Public: predict_mass()
 # ---------------------------------------------------------------------------
 def predict_mass(
-    species,
+    taxon,
     confidence_interval=False,
     method: str = "XGBoost",
+    interval_method: str = "stratified",
     include_taxonomy: bool = False,
     fuzzy_match_name: bool = False,
+    include_source: bool = False,
+    lookup: bool = True,
 ) -> pd.DataFrame:
-    """Predict body mass for one or more species.
+    """Predict body mass for one or more taxa.
 
     Parameters
     ----------
-    species : str, list of str, or pd.DataFrame
+    taxon : str, list of str, or pd.DataFrame
         Scientific name(s) to predict.  Pass a ``pd.DataFrame`` with columns
         ``kingdom``, ``phylum``, ``class``, ``order``, ``family``, ``genus``,
         ``species_resolved`` to skip the taxonomy lookup step.
@@ -150,8 +392,19 @@ def predict_mass(
         ``False`` — no interval (default).
         ``True`` — 90% conformal prediction interval.
         ``float`` in (0, 1) — interval at that coverage level.
+        Conformal intervals apply only to model-inferred values; rows returned
+        from the training-data dictionary receive ``NaN`` bounds.
+    interval_method : str
+        How the conformal half-width is computed when ``confidence_interval``
+        is not ``False``.  ``"stratified"`` (default) uses rank-specific
+        calibration residuals, providing approximate conditional coverage per
+        taxonomic rank.  ``"pooled"`` applies a single quantile from all
+        calibration residuals, providing the marginal conformal guarantee.
     method : str
-        Prediction method.  Currently only ``"XGBoost"`` is supported.
+        Prediction method.  ``"XGBoost"`` (default), ``"GPBoost"`` (gradient
+        boosting with nested taxonomic random effects; requires the ``gpboost``
+        package), or ``"EntityEmbeddings"`` (two-stage: taxonomy embeddings +
+        XGBoost on embedding vectors).
     include_taxonomy : bool
         If ``True``, include the resolved taxonomy columns in the output.
     fuzzy_match_name : bool
@@ -161,42 +414,59 @@ def predict_mass(
         output: it contains the originally entered name when a correction was
         applied or no GBIF match was found; ``None`` when the name was already
         canonical.  Default ``False`` (exact name matching).  Ignored when
-        ``species`` is a ``pd.DataFrame``.
+        ``taxon`` is a ``pd.DataFrame``.
+    include_source : bool
+        If ``True``, append a ``source`` column identifying the provenance of
+        each returned mass value.  For taxa returned directly from the
+        training-data dictionary the value is the original source identifier
+        (e.g., ``"fishbase"``, ``"Novak_unpubl"``).  For model-inferred
+        values it is ``"tbmML_"`` followed by the finest taxonomic rank
+        present in the training data (e.g., ``"tbmML_genus"`` if the genus
+        was seen during training; ``"tbmML_order"`` if only the order was
+        seen).  Unresolvable taxa receive ``None``.  Default ``False``.
+    lookup : bool
+        If ``True`` (default), taxa found in the training-data dictionary are
+        returned with their empirical mass and bypass the model.  If
+        ``False``, every resolved taxon is passed through the model specified
+        by ``method``.
 
     Returns
     -------
     pd.DataFrame
         Always includes ``taxon`` and ``mass_g`` (grams).
         With ``confidence_interval != False``: also ``lower_bound``,
-        ``upper_bound``, ``confidence``.
+        ``upper_bound``, ``confidence`` (``NaN`` for dictionary-sourced rows).
         With ``include_taxonomy=True``: also ``kingdom`` … ``species_resolved``.
         With ``fuzzy_match_name=True``: also ``matched_name`` (the originally
         entered name if corrected or unmatched; ``None`` if no correction was
         needed).
+        With ``include_source=True``: also ``source``.
         Rows for unresolvable species have ``NaN`` for numeric columns.
     """
     if method not in _METHODS:
         raise ValueError(f"Unknown method {method!r}. Available: {list(_METHODS)}")
+    interval_method = _resolve_interval_method(interval_method)
     level = _resolve_ci_level(confidence_interval)
+    _ensure_artifacts()
 
     # ---- Input handling ------------------------------------------------
-    if isinstance(species, pd.DataFrame):
+    if isinstance(taxon, pd.DataFrame):
         required = set(_TAXONOMY_INPUT_COLS)
-        missing = required - set(species.columns)
+        missing = required - set(taxon.columns)
         if missing:
             raise ValueError(
                 f"Input DataFrame is missing taxonomy columns: {sorted(missing)}"
             )  # noqa: E501
-        taxonomy_df = species.reset_index(drop=True)
+        taxonomy_df = taxon.reset_index(drop=True)
         input_names = taxonomy_df.get(
             "species", taxonomy_df["species_resolved"]
         ).tolist()  # noqa: E501
         matched_names = None
     else:
-        if isinstance(species, str):
-            names = [species]
+        if isinstance(taxon, str):
+            names = [taxon]
         else:
-            names = list(species)
+            names = list(taxon)
         if fuzzy_match_name:
             from ._fuzzy import fuzzy_lookup_taxonomy  # noqa: E501 local import avoids circular dep
 
@@ -226,6 +496,8 @@ def predict_mass(
             cols += ["lower_bound", "upper_bound", "confidence"]
         if include_taxonomy:
             cols += _TAXONOMY_INPUT_COLS
+        if include_source:
+            cols += ["source"]
         if matched_names is not None:
             cols += ["matched_name"]
         return pd.DataFrame(columns=cols)
@@ -242,12 +514,59 @@ def predict_mass(
     unresolved_pos = [i for i, ok in enumerate(resolved_mask) if not ok]
 
     result_rows = []
+
     if resolved_mask.any():
         sub = taxonomy_df[resolved_mask].reset_index(drop=True)
         sub_names = [input_names[i] for i in resolved_pos]
-        good_df = _METHODS[method](sub, level, include_taxonomy, sub_names)
-        good_df["_orig_idx"] = resolved_pos
-        result_rows.append(good_df)
+
+        # ---- Dictionary lookup (optional): return empirical mass for known species ---
+        if lookup:
+            lkp = load_lookup()
+            hit_mask = sub["species_resolved"].isin(lkp)
+            dict_indices = [i for i, h in enumerate(hit_mask) if h]
+            model_indices = [i for i, h in enumerate(hit_mask) if not h]
+        else:
+            dict_indices = []
+            model_indices = list(range(len(sub)))
+
+        if dict_indices:
+            dict_sub = sub.iloc[dict_indices].reset_index(drop=True)
+            dict_names = [sub_names[i] for i in dict_indices]
+            dict_data = []
+            for i, (name, sp) in enumerate(
+                zip(dict_names, dict_sub["species_resolved"])
+            ):  # noqa: E501
+                entry = lkp[sp]
+                row: dict = {"taxon": name, "mass_g": float(entry["mass_g"])}
+                if level is not None:
+                    row["lower_bound"] = float("nan")
+                    row["upper_bound"] = float("nan")
+                    row["confidence"] = float("nan")
+                if include_taxonomy:
+                    for col in _TAXONOMY_INPUT_COLS:
+                        row[col] = (
+                            dict_sub[col].iloc[i] if col in dict_sub.columns else None
+                        )  # noqa: E501
+                if include_source:
+                    row["source"] = entry["source"]
+                dict_data.append(row)
+            dict_df = pd.DataFrame(dict_data)
+            dict_df["_orig_idx"] = [resolved_pos[i] for i in dict_indices]
+            result_rows.append(dict_df)
+
+        if model_indices:
+            model_sub = sub.iloc[model_indices].reset_index(drop=True)
+            model_names = [sub_names[i] for i in model_indices]
+            good_df = _METHODS[method](
+                model_sub,
+                level,
+                include_taxonomy,
+                model_names,
+                include_source,
+                interval_method,  # noqa: E501
+            )
+            good_df["_orig_idx"] = [resolved_pos[i] for i in model_indices]
+            result_rows.append(good_df)
 
     if not resolved_mask.all():
         nan_names = [input_names[i] for i in unresolved_pos]
@@ -258,12 +577,15 @@ def predict_mass(
                     {
                         "lower_bound": float("nan"),
                         "upper_bound": float("nan"),
-                        "confidence": level,
+                        "confidence": float("nan"),
                     }
                 )
         if include_taxonomy:
             for r in nan_rows:
                 r.update({c: None for c in _TAXONOMY_INPUT_COLS})
+        if include_source:
+            for r in nan_rows:
+                r["source"] = None
         nan_df = pd.DataFrame(nan_rows)
         nan_df["_orig_idx"] = unresolved_pos
         result_rows.append(nan_df)

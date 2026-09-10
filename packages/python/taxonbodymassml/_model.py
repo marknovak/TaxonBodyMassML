@@ -4,7 +4,8 @@ Artifact management: download, cache, load model/calibration/categories.
 
 import hashlib
 import json
-from importlib.metadata import PackageNotFoundError, version as _pkg_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 from pathlib import Path
 
 import xgboost as xgb
@@ -74,7 +75,9 @@ def download_model(version: str = "latest", force: bool = False) -> None:
         cached = _CACHE_DIR / filename
         if not force and _verify(cached, filename):
             continue
-        print(f"TaxonBodyMassML: downloading {filename} from {HF_REPO_ID} on Hugging Face...")
+        print(
+            f"TaxonBodyMassML: downloading {filename} from {HF_REPO_ID} on Hugging Face..."  # noqa: E501
+        )  # noqa: E501
         local_path = Path(
             hf_hub_download(
                 repo_id=HF_REPO_ID,
@@ -101,7 +104,7 @@ def _ensure_artifacts() -> None:
     if missing:
         print(
             f"TaxonBodyMassML: downloading model artifacts on first use "
-            f"(~2 GB; files: {', '.join(missing)})..."
+            f"(files: {', '.join(missing)})..."
         )
         download_model()
     _ARTIFACTS_VERIFIED = True
@@ -112,7 +115,16 @@ def _ensure_artifacts() -> None:
 # ---------------------------------------------------------------------------
 _MODEL_CACHE: xgb.Booster | None = None
 _CALIBRATION_CACHE: list[float] | None = None
+_CALIBRATION_BY_RANK_CACHE: dict[str, list[float]] | None = None
+_CALIBRATION_BY_RANK_GPBOOST_CACHE: dict[str, list[float]] | None = None
+_CALIBRATION_BY_RANK_EE_CACHE: dict[str, list[float]] | None = None
 _CATEGORIES_CACHE: dict[str, list[str]] | None = None
+_LOOKUP_CACHE: dict[str, dict] | None = None
+_GPBOOST_MODEL_CACHE = None
+_CALIBRATION_GPBOOST_CACHE: list[float] | None = None
+_EMBEDDINGS_CACHE: dict | None = None
+_MODEL_EE_CACHE: xgb.Booster | None = None
+_CALIBRATION_EE_CACHE: list[float] | None = None
 
 
 def load_model() -> xgb.Booster:
@@ -132,9 +144,107 @@ def load_calibration() -> list[float]:
     return _CALIBRATION_CACHE
 
 
+def load_calibration_by_rank() -> dict[str, list[float]]:
+    global _CALIBRATION_BY_RANK_CACHE
+    if _CALIBRATION_BY_RANK_CACHE is None:
+        with open(_CACHE_DIR / "calibration_by_rank.json") as f:
+            _CALIBRATION_BY_RANK_CACHE = json.load(f)
+    return _CALIBRATION_BY_RANK_CACHE
+
+
+def load_calibration_by_rank_gpboost() -> dict[str, list[float]]:
+    global _CALIBRATION_BY_RANK_GPBOOST_CACHE
+    if _CALIBRATION_BY_RANK_GPBOOST_CACHE is None:
+        with open(_CACHE_DIR / "calibration_by_rank_gpboost.json") as f:
+            _CALIBRATION_BY_RANK_GPBOOST_CACHE = json.load(f)
+    return _CALIBRATION_BY_RANK_GPBOOST_CACHE
+
+
+def load_calibration_by_rank_ee() -> dict[str, list[float]]:
+    global _CALIBRATION_BY_RANK_EE_CACHE
+    if _CALIBRATION_BY_RANK_EE_CACHE is None:
+        with open(_CACHE_DIR / "calibration_by_rank_ee.json") as f:
+            _CALIBRATION_BY_RANK_EE_CACHE = json.load(f)
+    return _CALIBRATION_BY_RANK_EE_CACHE
+
+
 def load_categories() -> dict[str, list[str]]:
     global _CATEGORIES_CACHE
     if _CATEGORIES_CACHE is None:
         with open(_CACHE_DIR / "categories.json") as f:
             _CATEGORIES_CACHE = json.load(f)
     return _CATEGORIES_CACHE
+
+
+def load_lookup() -> dict[str, dict]:
+    global _LOOKUP_CACHE
+    if _LOOKUP_CACHE is None:
+        with open(_CACHE_DIR / "lookup.json") as f:
+            _LOOKUP_CACHE = json.load(f)
+    return _LOOKUP_CACHE
+
+
+def _require_file(filename: str, method: str, training_script: str) -> None:
+    path = _CACHE_DIR / filename
+    if not path.exists():
+        raise RuntimeError(
+            f"Artifacts for method={method!r} are not yet available ({filename!r} "
+            f"not found in cache). "
+            f"Generate them first:\n"
+            f"  python predictive_models/{training_script}\n"
+            f"Then run scripts/export_artifacts.py and copy the new SHA-256 "
+            f"checksums into packages/python/taxonbodymassml/_checksums.py."
+        )
+
+
+def load_model_gpboost():
+    global _GPBOOST_MODEL_CACHE
+    if _GPBOOST_MODEL_CACHE is None:
+        _require_file("model_gpboost.json", "GPBoost", "gpboost_model.py")
+        import gpboost as gpb
+
+        _GPBOOST_MODEL_CACHE = gpb.Booster(
+            model_file=str(_CACHE_DIR / "model_gpboost.json")
+        )  # noqa: E501
+    return _GPBOOST_MODEL_CACHE
+
+
+def load_calibration_gpboost() -> list[float]:
+    global _CALIBRATION_GPBOOST_CACHE
+    if _CALIBRATION_GPBOOST_CACHE is None:
+        _require_file("calibration_gpboost.json", "GPBoost", "gpboost_model.py")
+        with open(_CACHE_DIR / "calibration_gpboost.json") as f:
+            _CALIBRATION_GPBOOST_CACHE = json.load(f)["residuals"]
+    return _CALIBRATION_GPBOOST_CACHE
+
+
+def load_embeddings() -> dict:
+    global _EMBEDDINGS_CACHE
+    if _EMBEDDINGS_CACHE is None:
+        _require_file(
+            "embeddings.json", "EntityEmbeddings", "entity_embeddings_model.py"
+        )  # noqa: E501
+        with open(_CACHE_DIR / "embeddings.json") as f:
+            _EMBEDDINGS_CACHE = json.load(f)
+    return _EMBEDDINGS_CACHE
+
+
+def load_model_ee() -> xgb.Booster:
+    global _MODEL_EE_CACHE
+    if _MODEL_EE_CACHE is None:
+        _require_file("model_ee.ubj", "EntityEmbeddings", "entity_embeddings_model.py")
+        m = xgb.Booster()
+        m.load_model(str(_CACHE_DIR / "model_ee.ubj"))
+        _MODEL_EE_CACHE = m
+    return _MODEL_EE_CACHE
+
+
+def load_calibration_ee() -> list[float]:
+    global _CALIBRATION_EE_CACHE
+    if _CALIBRATION_EE_CACHE is None:
+        _require_file(
+            "calibration_ee.json", "EntityEmbeddings", "entity_embeddings_model.py"
+        )  # noqa: E501
+        with open(_CACHE_DIR / "calibration_ee.json") as f:
+            _CALIBRATION_EE_CACHE = json.load(f)["residuals"]
+    return _CALIBRATION_EE_CACHE

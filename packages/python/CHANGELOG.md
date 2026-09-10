@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.0] - 2026-08-27
+
+### Breaking
+
+- `predict_mass()` first argument renamed from `species` to `taxon`. Code
+  passing the argument positionally is unaffected; code using `species=...` as
+  a keyword argument must be updated to `taxon=...`.
+
+### Added
+
+- `predict_mass()` now checks a built-in species dictionary derived from the
+  training data before invoking the model. When the queried taxon has a
+  directly measured mass in the training data, that empirical value is returned
+  instead of a model prediction.
+- New `include_source` argument (default `False`). When `True`, a `source`
+  column is appended identifying the provenance of each returned mass value:
+  the original source identifier for dictionary-sourced values (e.g.,
+  `"fishbase"`, `"Novak_unpubl"`), or `"tbmML_<rank>"` for model-inferred
+  values, where `<rank>` is the finest taxonomic rank present in the training
+  data (e.g., `"tbmML_genus"`).
+- Conformal prediction interval columns (`lower_bound`, `upper_bound`,
+  `confidence`) are `NaN` for dictionary-sourced rows since empirical values
+  carry no model-based uncertainty estimate.
+- New artifact `lookup.json` distributed alongside the model on Hugging Face.
+  Update the checksum in `_checksums.py` after running
+  `scripts/export_artifacts.py`.
+
+---
+
 ## [0.6.1] - 2026-08-26
 
 ### Changed

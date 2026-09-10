@@ -50,7 +50,9 @@ def _gbif_fuzzy_name(name: str) -> Optional[str]:
             if corrected_genus and len(parts) >= 2:
                 candidate = f"{corrected_genus} {parts[1]}"
                 if candidate != name:
-                    resp2 = _get(_GBIF_FUZZY_URL, {"name": candidate, "rank": "SPECIES"})
+                    resp2 = _get(
+                        _GBIF_FUZZY_URL, {"name": candidate, "rank": "SPECIES"}
+                    )  # noqa: E501
                     if resp2.status_code == 200:
                         data2 = resp2.json()
                         if (
@@ -156,7 +158,8 @@ def fuzzy_lookup_taxonomy(species) -> pd.DataFrame:
     )
     if changed.any():
         pairs = "; ".join(
-            f"{r.input_name!r} -> {r.matched_name!r}" for r in corrections[changed].itertuples()
+            f"{r.input_name!r} -> {r.matched_name!r}"
+            for r in corrections[changed].itertuples()  # noqa: E501
         )
         warnings.warn(
             f"Fuzzy-matched {changed.sum()} name(s): {pairs}",
@@ -192,7 +195,7 @@ def fuzzy_predict_mass(species, **kwargs) -> pd.DataFrame:
     -------
     pd.DataFrame
         Same columns as ``predict_mass()`` with ``matched_name`` appended
-        and ``species`` reflecting the original input names.
+        and ``taxon`` reflecting the original input names.
     """
     warnings.warn(
         "'fuzzy_predict_mass()' is deprecated. "

@@ -114,7 +114,7 @@ def test_predict_unresolvable_species():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         result = tbm.predict_mass("xxxxnotaspeciesxxxx")
-    assert any("Could not resolve" in str(warning.message) for warning in w)
+    assert any("No species could be resolved" in str(warning.message) for warning in w)
     import math
 
     assert math.isnan(result["mass_g"].iloc[0])
@@ -166,11 +166,121 @@ def test_fuzzy_match_matched_name_none_when_no_correction_needed():
 @skip_without_artifacts
 def test_fuzzy_match_species_none_and_matched_name_set_when_gbif_finds_no_match():
     import math
+
     import taxonbodymassml as tbm
 
     with warnings.catch_warnings(record=True):
         warnings.simplefilter("always")
-        result = tbm.predict_mass("Xyzzy_definitely_not_a_species_12345", fuzzy_match_name=True)
+        result = tbm.predict_mass(
+            "Xyzzy_definitely_not_a_species_12345", fuzzy_match_name=True
+        )  # noqa: E501
     assert result["taxon"].iloc[0] is None
     assert result["matched_name"].iloc[0] == "Xyzzy_definitely_not_a_species_12345"
     assert math.isnan(result["mass_g"].iloc[0])
+
+
+# ---------------------------------------------------------------------------
+# Dictionary lookup and include_source
+# ---------------------------------------------------------------------------
+
+
+@skip_without_artifacts
+def test_dict_hit_returns_empirical_mass():
+    """Nucella ostrina is in training data with mass_g=0.7."""
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella ostrina")
+    assert result["mass_g"].iloc[0] == pytest.approx(0.7)
+
+
+@skip_without_artifacts
+def test_include_source_dict_hit_returns_source_string():
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella ostrina", include_source=True)
+    assert "source" in result.columns
+    assert result["source"].iloc[0] == "Novak_unpubl"
+
+
+@skip_without_artifacts
+def test_dict_hit_ci_columns_are_nan():
+    import math
+
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella ostrina", confidence_interval=True)
+    assert "lower_bound" in result.columns
+    assert math.isnan(result["lower_bound"].iloc[0])
+    assert math.isnan(result["upper_bound"].iloc[0])
+    assert math.isnan(result["confidence"].iloc[0])
+
+
+@skip_without_artifacts
+def test_include_source_model_inferred_genus_known():
+    """Nucella lima is not in training data but the genus Nucella is known."""
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella lima", include_source=True)
+    assert "source" in result.columns
+    assert result["source"].iloc[0] == "tbmML_genus"
+
+
+@skip_without_artifacts
+def test_include_source_unresolvable_returns_none():
+    import taxonbodymassml as tbm
+
+    with warnings.catch_warnings(record=True):
+        warnings.simplefilter("always")
+        result = tbm.predict_mass(
+            "Xyzzy_definitely_not_a_species_12345", include_source=True
+        )  # noqa: E501
+    assert "source" in result.columns
+    assert result["source"].iloc[0] is None
+
+
+@skip_without_artifacts
+def test_mixed_dict_model_unresolved_order_preserved():
+    """Output order is preserved across dict hits, model rows, and unresolved."""
+    import math
+
+    import taxonbodymassml as tbm
+
+    sp = [
+        "Nucella ostrina",  # dict hit
+        "Canis lupus",  # model-inferred
+        "Xyzzy_definitely_not_a_species_12345",  # unresolvable
+    ]
+    with warnings.catch_warnings(record=True):
+        warnings.simplefilter("always")
+        result = tbm.predict_mass(sp, include_source=True)
+
+    assert len(result) == 3
+    assert result["taxon"].iloc[0] == "Nucella ostrina"
+    assert result["mass_g"].iloc[0] == pytest.approx(0.7)
+    assert result["source"].iloc[0] == "Novak_unpubl"
+    assert result["mass_g"].iloc[1] > 0
+    assert result["source"].iloc[1].startswith("tbmML_")
+    assert math.isnan(result["mass_g"].iloc[2])
+    assert result["source"].iloc[2] is None
+
+
+# ---------------------------------------------------------------------------
+# lookup parameter
+# ---------------------------------------------------------------------------
+
+
+@skip_without_artifacts
+def test_lookup_false_routes_dict_species_through_model():
+    """With lookup=False, a dict species should get model mass, not empirical."""
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella ostrina", lookup=False)
+    assert result["mass_g"].iloc[0] != pytest.approx(0.7)
+
+
+@skip_without_artifacts
+def test_lookup_false_include_source_returns_tbmml_prefix():
+    import taxonbodymassml as tbm
+
+    result = tbm.predict_mass("Nucella ostrina", lookup=False, include_source=True)
+    assert result["source"].iloc[0].startswith("tbmML_")
