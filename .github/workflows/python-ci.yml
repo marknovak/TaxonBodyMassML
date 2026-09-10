@@ -38,7 +38,7 @@ jobs:
         run: black --check .
 
       - name: flake8 (style check)
-        run: flake8 taxonbodymassml tests --max-line-length=100
+        run: flake8 taxonbodymassml tests --max-line-length=100 --extend-ignore=E203
 
       - name: pytest (unit tests only; no artifact download)
         run: pytest -v
