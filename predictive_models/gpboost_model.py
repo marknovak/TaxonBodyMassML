@@ -56,7 +56,7 @@ def _load_best_params():
 
 _best_lgbm, NUM_BOOST_ROUND = _load_best_params()
 PARAMS = {
-    "objective": "regression_l1",
+    "objective": "regression",
     "verbose": -1,
     **_best_lgbm,
 }
@@ -100,7 +100,7 @@ def build_group_data(df: pd.DataFrame, species_col: str = "species") -> np.ndarr
 def train_gpboost(X: pd.DataFrame, y: np.ndarray, group_data: np.ndarray):
     gp_model = gpb.GPModel(group_data=group_data, likelihood="gaussian")
     gp_model.set_optim_params({"optimizer_cov": "lbfgs", "use_nesterov_acc": True})
-    dataset = gpb.Dataset(X, label=y, group_data=group_data, free_raw_data=False)
+    dataset = gpb.Dataset(X, label=y, free_raw_data=False)
     booster = gpb.train(
         params=PARAMS,
         train_set=dataset,
@@ -142,7 +142,9 @@ gd_tr2 = gd_train[idx_tr2]
 gd_cal = gd_train[idx_calib]
 
 booster_calib = train_gpboost(X_tr2, y_tr2, gd_tr2)
-calib_preds = booster_calib.predict(data=X_calib, group_data_pred=gd_cal)
+calib_preds = booster_calib.predict(data=X_calib, group_data_pred=gd_cal)[  # noqa: E501
+    "response_mean"
+]
 calib_residuals = sorted(float(r) for r in np.abs(y_calib - calib_preds))
 
 calibration_path = OUT_DIR / "calibration_gpboost.json"
@@ -176,7 +178,9 @@ for rank, (finer_cols, gd_cols) in RANKS_FINER_GPB.items():
     gd_masked = gd_cal.copy()
     for idx in gd_cols:
         gd_masked[:, idx] = "MASKED_UNK"
-    rank_preds = booster_calib.predict(data=X_masked, group_data_pred=gd_masked)
+    rank_preds = booster_calib.predict(data=X_masked, group_data_pred=gd_masked)[  # noqa: E501
+        "response_mean"
+    ]
     res_rank = np.abs(y_calib - rank_preds)
     by_rank_gpb[rank] = sorted(float(r) for r in res_rank)
     print(f"  {rank}: q90={float(np.quantile(res_rank, 0.90)):.4f}")
@@ -197,7 +201,7 @@ booster = train_gpboost(X_train, y_train, gd_train)
 # ---------------------------------------------------------------------------
 # 4. Evaluate on test set
 # ---------------------------------------------------------------------------
-log_preds_test = booster.predict(data=X_test, group_data_pred=gd_test)
+log_preds_test = booster.predict(data=X_test, group_data_pred=gd_test)["response_mean"]
 mae = float(mean_absolute_error(y_test, log_preds_test))
 rmse = float(np.sqrt(mean_squared_error(y_test, log_preds_test)))
 r2 = float(r2_score(y_test, log_preds_test))

@@ -1,0 +1,26 @@
+{
+  "method": "GPBoost",
+  "r2": 0.6856360272554891,
+  "rmse": 1.1077660752752845,
+  "mae": 0.7686948122115953,
+  "n_train": 33575,
+  "n_test": 3730,
+  "log10_space": true,
+  "num_boost_round": 300,
+  "params": {
+    "objective": "regression",
+    "verbose": -1,
+    "learning_rate": 0.25524598271034576,
+    "max_depth": 6,
+    "num_leaves": 7,
+    "min_data_in_leaf": 19
+  },
+  "group_cols": [
+    "species",
+    "genus",
+    "family",
+    "order",
+    "class"
+  ],
+  "timestamp": "2026-09-09T14:33:38.801466+00:00"
+}
