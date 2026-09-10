@@ -26,3 +26,13 @@ predict_mass(
   fuzzy_match_name = TRUE,
   confidence_interval = 0.90
 )
+
+# ---------------------------------------------------------------------------
+# Example 3 — include_source: show provenance of each returned mass value
+# ---------------------------------------------------------------------------
+cat("\n=== Example 3: predict_mass() with include_source = TRUE ===\n")
+predict_mass(
+  c("Nucella ostrina",  # in training data — returns empirical mass
+    "Nucella lima"),    # not in training data — model infers from genus
+  include_source = TRUE
+)

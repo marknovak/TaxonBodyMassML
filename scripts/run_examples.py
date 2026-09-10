@@ -1,5 +1,6 @@
 """
-Run the manuscript code examples and print formatted output for §4.3.
+Run the manuscript code examples and print formatted output for the
+Distribution and usage section.
 
 Requires internet access for GBIF taxonomy lookups on first run.
 Model artifacts are cached after the first download (~2 GB).
@@ -32,3 +33,16 @@ r2 = tbm.predict_mass(
 )
 cols = ["taxon", "matched_name", "mass_g", "lower_bound", "upper_bound"]
 print(r2[cols].to_string(index=False))
+
+# ---------------------------------------------------------------------------
+# Example 3 — include_source: show provenance of each returned mass value
+# ---------------------------------------------------------------------------
+print("\n=== Example 3: predict_mass() with include_source=True ===")
+r3 = tbm.predict_mass(
+    [
+        "Nucella ostrina",  # in training data — returns empirical mass
+        "Nucella lima",  # not in training data — model infers from genus
+    ],
+    include_source=True,
+)
+print(r3[["taxon", "mass_g", "source"]].to_string(index=False))

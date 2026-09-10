@@ -5,12 +5,23 @@ Run from the repository root:
     python scripts/export_artifacts.py
 
 Outputs (in artifacts/):
-    model.ubj         -- XGBoost model in binary UBJSON format (~2 GB; cross-platform)
-    calibration.json  -- {"residuals": [<float>, ...]} full sorted calibration residuals
-    categories.json   -- {"<col>": [<str>, ...]} valid training category sets per column
-    checksums.json    -- {"model.ubj": "<sha256>", "calibration.json": "<sha256>", ...}
+    model.ubj              -- XGBoost model (~2 GB, binary UBJSON)
+    calibration.json       -- pooled XGBoost conformal calibration residuals
+    calibration_by_rank.json -- rank-stratified XGBoost calibration residuals
+    categories.json        -- valid training category sets per column
+    lookup.json            -- species → {mass_g, source} lookup
+    model_gpboost.json     -- GPBoost model (trees + GP parameters + BLUPs)
+    calibration_gpboost.json -- GPBoost conformal calibration residuals
+    embeddings.json        -- EE embedding lookup {col: {value: [floats]}}
+    model_ee.ubj           -- Entity Embeddings Stage 2 XGBoost model
+    calibration_ee.json    -- EE conformal calibration residuals
+    checksums.json         -- SHA-256 for all artifact files above
 
-Upload these four files to the Hugging Face model repository:
+Prerequisites: run the training scripts first to generate the new method artifacts:
+    python predictive_models/gpboost_model.py
+    python predictive_models/entity_embeddings_model.py
+
+Upload all files to the Hugging Face model repository:
     https://huggingface.co/marknovak/TaxonBodyMassML
 
 Using the huggingface_hub CLI:
@@ -37,6 +48,7 @@ from sklearn.model_selection import train_test_split
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODEL_PKL = REPO_ROOT / "regressor_microservice" / "sliced_model" / "xgboost_model.pkl"
 TRAIN_CSV = REPO_ROOT / "data" / "split" / "train.csv"
+RAW_CSV = REPO_ROOT / "data" / "TaxonBodyMass.csv"
 OUT_DIR = REPO_ROOT / "artifacts"
 OUT_DIR.mkdir(exist_ok=True)
 
@@ -148,23 +160,111 @@ if abs(q_rebuilt - q_stored) > 0.05:
         "by more than 0.05 — likely wrong training data or wrong random_state."
     )
 
+# ---------------------------------------------------------------------------
+# 4b. Build rank-stratified calibration residuals.
+#     For each rank, mask all finer-rank columns to "UNK" in the calibration
+#     set and recompute predictions.  This matches the inference condition for
+#     each rank (e.g. genus-level queries have species=UNK; family-level have
+#     genus=UNK and species=UNK) and is used by the "stratified" interval
+#     method to approximate rank-conditional coverage guarantees.
+# ---------------------------------------------------------------------------
+print("Building rank-stratified calibration residuals...")
+RANKS_FINER = {
+    "genus": ["species"],
+    "family": ["genus", "species"],
+    "order": ["family", "genus", "species"],
+    "class": ["order", "family", "genus", "species"],
+    "phylum": ["class", "order", "family", "genus", "species"],
+    "kingdom": ["phylum", "class", "order", "family", "genus", "species"],
+}
+
+by_rank_residuals = {}
+for rank, finer_cols in RANKS_FINER.items():
+    x_masked = x_calib.copy()
+    for col in finer_cols:
+        x_masked[col] = pd.Categorical(
+            ["UNK"] * len(x_masked),
+            categories=x_calib[col].cat.categories,
+        )
+    y_pred_rank = model.predict(x_masked)
+    res_rank = np.abs(y_calib.values - y_pred_rank)
+    by_rank_residuals[rank] = sorted(float(r) for r in res_rank)
+    q_rank = float(np.quantile(res_rank, 0.90))
+    print(f"  {rank}: {len(res_rank)} samples, q90={q_rank:.4f}")
+
+by_rank_path = OUT_DIR / "calibration_by_rank.json"
+with open(by_rank_path, "w") as f:
+    json.dump(by_rank_residuals, f)
+print(f"  Saved rank-stratified residuals → {by_rank_path}")
+
 categories_path = OUT_DIR / "categories.json"
 with open(categories_path, "w") as f:
     json.dump(categories, f, indent=2)
 print(f"  Saved categories → {categories_path}")
 
 # ---------------------------------------------------------------------------
-# 5. Compute per-file SHA256 checksums
+# 5. Build species → {mass_g, source} lookup table from raw training data.
+#    Keys are space-normalized species names (underscores replaced with spaces)
+#    matching the species_resolved values returned by the taxonomy lookup.
+# ---------------------------------------------------------------------------
+print("Building species lookup table from raw training data...")
+raw = pd.read_csv(RAW_CSV)
+raw["_key"] = raw["taxon"].astype(str).str.replace("_", " ", regex=False)
+n_before = len(raw)
+raw = raw.drop_duplicates(subset="_key", keep="first")
+if len(raw) < n_before:
+    print(
+        f"  WARNING: {n_before - len(raw)} duplicate taxon(s) dropped (keeping first row)."  # noqa: E501
+    )  # noqa: E501
+lookup = {
+    row["_key"]: {
+        "mass_g": float(row["mass_g"]),
+        "source": str(row["source_mass"]),
+    }
+    for _, row in raw.iterrows()
+}
+lookup_path = OUT_DIR / "lookup.json"
+with open(lookup_path, "w") as f:
+    json.dump(lookup, f)
+print(f"  Saved {len(lookup)} species → {lookup_path}")
+
+# ---------------------------------------------------------------------------
+# 6. Compute per-file SHA256 checksums (core four XGBoost artifacts)
 # ---------------------------------------------------------------------------
 print("Computing SHA256 checksums...")
 checksums = {}
 for fname, path in [
     ("model.ubj", model_path),
     ("calibration.json", calibration_path),
+    ("calibration_by_rank.json", by_rank_path),
     ("categories.json", categories_path),
+    ("lookup.json", lookup_path),
 ]:
     checksums[fname] = sha256_file(path)
     print(f"  {fname}: {checksums[fname]}")
+
+# ---------------------------------------------------------------------------
+# 7. Compute checksums for new-method artifacts (if present)
+#    These are generated by:
+#        python predictive_models/gpboost_model.py
+#        python predictive_models/entity_embeddings_model.py
+# ---------------------------------------------------------------------------
+new_artifacts = [
+    "model_gpboost.json",
+    "calibration_gpboost.json",
+    "calibration_by_rank_gpboost.json",
+    "embeddings.json",
+    "model_ee.ubj",
+    "calibration_ee.json",
+    "calibration_by_rank_ee.json",
+]
+for fname in new_artifacts:
+    path = OUT_DIR / fname
+    if path.exists():
+        checksums[fname] = sha256_file(path)
+        print(f"  {fname}: {checksums[fname]}")
+    else:
+        print(f"  {fname}: MISSING — run the training script first (see docstring)")
 
 checksums_path = OUT_DIR / "checksums.json"
 with open(checksums_path, "w") as f:
@@ -172,10 +272,10 @@ with open(checksums_path, "w") as f:
 print(f"  Written to {checksums_path}")
 
 # ---------------------------------------------------------------------------
-# 6. Instructions
+# 8. Instructions
 # ---------------------------------------------------------------------------
 print("""
-Done. Upload the four files in artifacts/ to Hugging Face:
+Done. Upload all files in artifacts/ to Hugging Face:
 
     pip install huggingface_hub
     huggingface-cli login
