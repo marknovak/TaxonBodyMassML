@@ -19,6 +19,8 @@ chosen values.
 | **Create** | `predictive_models/requirements.txt` |
 | **Update** | `ms/XGBoost_Training_Summary.md` — document the tuning procedure |
 | **Update** | `predictive_models/decision_tree.py` — apply best params after reviewing results |
+| **Output** | `predictive_models/results/tuning_study_gpboost.json` — GPBoost tuning results |
+| **Output** | `predictive_models/results/tuning_study_ee.json` — Entity Embeddings Stage 2 tuning results |
 
 ---
 
@@ -230,3 +232,133 @@ study = optuna.create_study(
 4. Review the JSON output; if best params differ materially from current, apply them
    to `decision_tree.py`, re-train, confirm `predictive_models/results/metrics.json`
    shows improved MAE.
+
+---
+
+## 5. GPBoost Hyperparameter Tuning
+
+### Context
+
+`gpboost_model.py` uses fixed LightGBM hyperparameters with no automated search. This
+section documents tuning that model via `tune_hyperparameters.py --model gpboost`.
+
+### Running the tuner
+
+```bash
+python predictive_models/tune_hyperparameters.py --model gpboost
+```
+
+Each trial builds one `gpb.GPModel` + `gpb.Dataset` per fold and runs `gpb.train()`.
+The GP covariance parameters are re-estimated inside each fold.
+
+### Search space
+
+| Parameter | Type | Range | Fixed |
+|---|---|---|---|
+| `learning_rate` | float (log) | 0.01 – 0.30 | |
+| `max_depth` | int | 4 – 20 | |
+| `num_leaves` | int | 15 – 255 | |
+| `min_data_in_leaf` | int | 1 – 20 | |
+| `num_boost_round` | int (step 50) | 100 – 800 | |
+| `objective` | — | — | `"regression_l1"` |
+| `verbose` | — | — | `-1` |
+
+`bagging_fraction`, `bagging_freq`, and `feature_fraction` are excluded to keep the
+search space manageable.
+
+### Current baseline (from `gpboost_model.py`)
+
+```python
+NUM_BOOST_ROUND = 500
+PARAMS = {
+    "learning_rate":    0.05,
+    "max_depth":        12,
+    "num_leaves":       127,
+    "min_data_in_leaf": 1,
+}
+```
+
+### Output files
+
+- `predictive_models/results/tuning_gpboost.db` — resumable Optuna SQLite study
+- `predictive_models/results/tuning_study_gpboost.json` — best params, CV MAE, all trials
+
+### Applying results
+
+1. Review `tuning_study_gpboost.json`. Compare `best_cv_mae` against test MAE in
+   `predictive_models/results/metrics_gpboost.json`.
+2. If improved, update `NUM_BOOST_ROUND` and the `PARAMS` dict in `gpboost_model.py`.
+3. Re-run `python predictive_models/gpboost_model.py` to regenerate artifacts.
+
+### Runtime estimate
+
+100 trials × 5 folds × ~30–60 s/fold ≈ **4–8 hours** on a laptop CPU.
+Use `N_TRIALS=3, N_FOLDS=2` for a smoke test first.
+
+---
+
+## 6. Entity Embeddings Stage 2 Hyperparameter Tuning
+
+### Context
+
+`entity_embeddings_model.py` uses a fixed XGBoost configuration for Stage 2 (the head
+trained on embedding features). Stage 1 (the PyTorch MLP) is expensive to run repeatedly,
+so the tuner pre-trains it once on the full training set, extracts the 116-dimensional
+embedding feature matrix, and then runs KFold CV solely on Stage 2. This correctly
+isolates Stage 2 parameters while keeping wall time reasonable.
+
+### Running the tuner
+
+```bash
+python predictive_models/tune_hyperparameters.py --model ee
+```
+
+Stage 1 MLP training (~100 epochs) runs once at startup and is printed as progress.
+All 100 × 5 Optuna trials operate on the cached embedding matrix.
+
+### Search space
+
+| Parameter | Type | Range | Fixed |
+|---|---|---|---|
+| `n_estimators` | int (step 50) | 200 – 800 | |
+| `max_depth` | int | 4 – 15 | |
+| `learning_rate` | float (log) | 0.01 – 0.30 | |
+| `subsample` | float | 0.5 – 1.0 | |
+| `colsample_bytree` | float | 0.5 – 1.0 | |
+| `min_child_weight` | int | 1 – 10 | |
+| `objective` | — | — | `"reg:absoluteerror"` |
+| `random_state` | — | — | `42` |
+
+`colsample_bytree` is added relative to the current `STAGE2_PARAMS` because with 116
+continuous embedding features it is a meaningful regularizer. `enable_categorical` is
+not set (features are continuous floats).
+
+### Current baseline (from `entity_embeddings_model.py`)
+
+```python
+STAGE2_PARAMS = {
+    "n_estimators":  400,
+    "max_depth":     8,
+    "learning_rate": 0.1,
+    "subsample":     0.8,
+}
+```
+
+### Output files
+
+- `predictive_models/results/tuning_ee.db` — resumable Optuna SQLite study
+- `predictive_models/results/tuning_study_ee.json` — best params, CV MAE, all trials
+
+### Applying results
+
+1. Review `tuning_study_ee.json`. Compare `best_cv_mae` against test MAE in
+   `predictive_models/results/metrics_ee.json`.
+2. If improved, update `STAGE2_PARAMS` in `entity_embeddings_model.py` (add
+   `colsample_bytree` and `min_child_weight` if they appear in the best params).
+3. Re-run `python predictive_models/entity_embeddings_model.py` to regenerate artifacts.
+
+### Runtime estimate
+
+Stage 1 MLP pre-train: ~5–10 minutes on CPU (or ~1–2 min on GPU).
+100 trials × 5 folds × ~10–30 s/fold ≈ **1–3 hours** on a laptop CPU.
+Use `N_TRIALS=3, N_FOLDS=2` for a smoke test first.

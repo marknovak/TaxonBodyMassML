@@ -21,17 +21,25 @@ Requirements:
 
 import datetime
 import json
+import os
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-import torch
-import torch.nn as nn
-import xgboost as xgb
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
-from torch.optim.lr_scheduler import OneCycleLR
-from torch.utils.data import DataLoader, TensorDataset
+# Prevent libomp crash: XGBoost and PyTorch both call __kmp_fork_call; capping OMP
+# threads at 1 stops the barrier wait crash in __kmp_suspend_initialize_thread.
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import torch  # noqa: E402
+import torch.nn as nn  # noqa: E402
+import xgboost as xgb  # noqa: E402
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score  # noqa: E402, E501
+from sklearn.model_selection import train_test_split  # noqa: E402
+from torch.optim.lr_scheduler import OneCycleLR  # noqa: E402
+from torch.utils.data import DataLoader, TensorDataset  # noqa: E402
+
+torch.set_num_threads(1)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TRAIN_CSV = REPO_ROOT / "data" / "split" / "train.csv"

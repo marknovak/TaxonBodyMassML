@@ -6,7 +6,7 @@ TUNE_GPB  = predictive_models/results/tuning_study_gpboost.json
 TUNE_EE   = predictive_models/results/tuning_study_ee.json
 
 .PHONY: all fetch split \
-        tune tune-xgboost tune-gpboost tune-ee \
+        tune tune-xgboost tune-gpboost tune-gpboost-parallel tune-ee \
         train train-xgboost train-gpboost train-ee \
         artifacts clean-tune
 
@@ -34,8 +34,15 @@ $(TUNE_EE): $(SPLIT)
 
 tune-xgboost: $(TUNE_XGB)
 tune-gpboost: $(TUNE_GPB)
+tune-gpboost-parallel: $(SPLIT)
+	python -c "import optuna, pathlib; optuna.create_study(study_name='tbml_gpboost', storage='sqlite:///'+str(pathlib.Path('predictive_models/results/tuning_gpboost.db').resolve()), direction='minimize', load_if_exists=True)"
+	python predictive_models/tune_hyperparameters.py --model gpboost & \
+	python predictive_models/tune_hyperparameters.py --model gpboost & \
+	python predictive_models/tune_hyperparameters.py --model gpboost & \
+	wait
+	@echo "GPBoost parallel tuning complete"
 tune-ee: $(TUNE_EE)
-tune: tune-xgboost tune-gpboost tune-ee
+tune: tune-xgboost tune-ee
 
 # ---- Training (each reads best params from its tuning JSON at runtime) --------
 train-xgboost: $(TUNE_XGB)
@@ -47,7 +54,7 @@ train-gpboost: $(TUNE_GPB)
 train-ee: $(TUNE_EE)
 	python predictive_models/entity_embeddings_model.py
 
-train: train-xgboost train-gpboost train-ee
+train: train-xgboost train-ee
 
 # ---- Artifact export ----------------------------------------------------------
 artifacts: train
