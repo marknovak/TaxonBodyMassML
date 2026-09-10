@@ -14,9 +14,17 @@ NULL
 .HF_REPO_ID <- "marknovak/TaxonBodyMassML"
 
 .CHECKSUMS <- list(
-  "model.ubj"        = "6f94483f99af5f3792cd602b70735b5f34f3b7329b6cd76bf88ac33775fa4ac8",
-  "calibration.json" = "931b981419b8950e85be8195b5837855f89716c6f9353c4062ea7fce4a72c6ca",
-  "categories.json"  = "c1db62061c22673bde63b3347246373c4340e3a92d35804df892b1ec9938298d"
+  # XGBoost (original method)
+  "model.ubj"               = "0fdb5d375e6158cd8eed635330f9f06d1d3054af65ee3857ff6890d2e15e94ed",
+  "calibration.json"        = "814fd4dde6421e0509de77d778dfb62f5beab9d129af1744b5f1aa59095bc1bd",
+  "calibration_by_rank.json" = "dd409f4d0f7e544d36309328c89135d8669539e365bd93076b639e5f8be01280",
+  "categories.json"         = "910394f7a8fa2d4d34b3a559ad170f7d6d4909f9ad88167d3820e6701ca0b377",
+  "lookup.json"             = "ba530ab9b34eb5a0c236fd6c1ebba0e6fa04ec3287011887681146282dd6cd46",
+  # Entity Embeddings
+  "embeddings.json"              = "664206d2ff673a9a86d55893e3b9e77e2291d812322acf362cfce08d6bddd81d",
+  "model_ee.ubj"                 = "1ed9cc8a0509be42aade44cb878f40ae71eb33f6a711531db9f750628df163e8",
+  "calibration_ee.json"          = "a43e8dc258f4db18324c340105a65c38a40a8e59373ed21058ca05ead4e366ec",
+  "calibration_by_rank_ee.json"  = "b54e422030f356ab5d50e302e6b635fa878cd3f68583005d593215000dc35841"
 )
 
 .ARTIFACT_FILES <- names(.CHECKSUMS)
@@ -115,7 +123,7 @@ download_model <- function(version = "latest", force = FALSE) {
     }
     message("  Downloading ", filename, " from ", .HF_REPO_ID, " on Hugging Face...")
     req <- .tbm_req(.hf_url(filename, revision)) |>
-      httr2::req_timeout(0) |>
+      httr2::req_timeout(7200) |>
       httr2::req_progress()
     httr2::req_perform(req, path = dest)
     if (!isTRUE(.verify_file(dest, filename))) {
@@ -168,10 +176,119 @@ download_model <- function(version = "latest", force = FALSE) {
   .model_env$residuals
 }
 
+.load_calibration_by_rank <- function() {
+  if (!exists("residuals_by_rank", envir = .model_env, inherits = FALSE)) {
+    cal <- jsonlite::fromJSON(file.path(.cache_dir(), "calibration_by_rank.json"))
+    assign("residuals_by_rank", cal, envir = .model_env)
+  }
+  .model_env$residuals_by_rank
+}
+
+.load_calibration_by_rank_gpboost <- function() {
+  if (!exists("residuals_by_rank_gpboost", envir = .model_env, inherits = FALSE)) {
+    cal <- jsonlite::fromJSON(
+      file.path(.cache_dir(), "calibration_by_rank_gpboost.json")
+    )
+    assign("residuals_by_rank_gpboost", cal, envir = .model_env)
+  }
+  .model_env$residuals_by_rank_gpboost
+}
+
+.load_calibration_by_rank_ee <- function() {
+  if (!exists("residuals_by_rank_ee", envir = .model_env, inherits = FALSE)) {
+    cal <- jsonlite::fromJSON(
+      file.path(.cache_dir(), "calibration_by_rank_ee.json")
+    )
+    assign("residuals_by_rank_ee", cal, envir = .model_env)
+  }
+  .model_env$residuals_by_rank_ee
+}
+
 .load_categories <- function() {
   if (!exists("categories", envir = .model_env, inherits = FALSE)) {
     cats <- jsonlite::fromJSON(file.path(.cache_dir(), "categories.json"))
     assign("categories", cats, envir = .model_env)
   }
   .model_env$categories
+}
+
+.load_lookup <- function() {
+  if (!exists("lookup", envir = .model_env, inherits = FALSE)) {
+    lkp <- jsonlite::fromJSON(file.path(.cache_dir(), "lookup.json"),
+                              simplifyDataFrame = FALSE)
+    assign("lookup", lkp, envir = .model_env)
+  }
+  .model_env$lookup
+}
+
+.require_method_file <- function(filename, method, training_script) {
+  path <- file.path(.cache_dir(), filename)
+  if (!file.exists(path))
+    stop(
+      sprintf(
+        paste0(
+          "Artifacts for method = \"%s\" are not yet available (\"%s\" not found ",
+          "in cache). Generate them first:\n",
+          "  python predictive_models/%s\n",
+          "Then run scripts/export_artifacts.py and copy the new SHA-256 ",
+          "checksums into packages/r/R/model.R."
+        ),
+        method, filename, training_script
+      ),
+      call. = FALSE
+    )
+}
+
+.load_gpboost_model <- function() {
+  if (!exists("gpboost_model", envir = .model_env, inherits = FALSE)) {
+    .require_method_file("model_gpboost.json", "GPBoost", "gpboost_model.py")
+    bst <- gpboost::gpb.load(
+      file.path(.cache_dir(), "model_gpboost.json")
+    )
+    assign("gpboost_model", bst, envir = .model_env)
+  }
+  .model_env$gpboost_model
+}
+
+.load_calibration_gpboost <- function() {
+  if (!exists("residuals_gpboost", envir = .model_env, inherits = FALSE)) {
+    .require_method_file("calibration_gpboost.json", "GPBoost", "gpboost_model.py")
+    cal <- jsonlite::fromJSON(
+      file.path(.cache_dir(), "calibration_gpboost.json")
+    )
+    assign("residuals_gpboost", cal$residuals, envir = .model_env)
+  }
+  .model_env$residuals_gpboost
+}
+
+.load_embeddings <- function() {
+  if (!exists("embeddings", envir = .model_env, inherits = FALSE)) {
+    .require_method_file("embeddings.json", "EntityEmbeddings",
+                         "entity_embeddings_model.py")
+    embs <- jsonlite::fromJSON(file.path(.cache_dir(), "embeddings.json"))
+    assign("embeddings", embs, envir = .model_env)
+  }
+  .model_env$embeddings
+}
+
+.load_model_ee <- function() {
+  if (!exists("model_ee", envir = .model_env, inherits = FALSE)) {
+    .require_method_file("model_ee.ubj", "EntityEmbeddings",
+                         "entity_embeddings_model.py")
+    m <- xgboost::xgb.load(file.path(.cache_dir(), "model_ee.ubj"))
+    assign("model_ee", m, envir = .model_env)
+  }
+  .model_env$model_ee
+}
+
+.load_calibration_ee <- function() {
+  if (!exists("residuals_ee", envir = .model_env, inherits = FALSE)) {
+    .require_method_file("calibration_ee.json", "EntityEmbeddings",
+                         "entity_embeddings_model.py")
+    cal <- jsonlite::fromJSON(
+      file.path(.cache_dir(), "calibration_ee.json")
+    )
+    assign("residuals_ee", cal$residuals, envir = .model_env)
+  }
+  .model_env$residuals_ee
 }

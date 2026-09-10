@@ -2,27 +2,39 @@
 % Please edit documentation in R/predict.R
 \name{predict_mass}
 \alias{predict_mass}
-\title{Predict body mass for one or more species}
+\title{Predict body mass for one or more taxa}
 \usage{
 predict_mass(
-  species,
+  taxon,
   confidence_interval = FALSE,
   method = "XGBoost",
+  interval_method = "stratified",
   include_taxonomy = FALSE,
-  fuzzy_match_name = FALSE
+  fuzzy_match_name = FALSE,
+  include_source = FALSE,
+  lookup = TRUE
 )
 }
 \arguments{
-\item{species}{A character vector of scientific names, or a \code{data.frame}
+\item{taxon}{A character vector of scientific names, or a \code{data.frame}
 with columns \code{kingdom}, \code{phylum}, \code{class}, \code{order}, \code{family}, \code{genus},
 and \code{species_resolved} (as returned by \code{lookup_taxonomy()}).}
 
 \item{confidence_interval}{\code{FALSE} (default, no interval), \code{TRUE} (90\%
 conformal prediction interval), or a numeric in (0, 1) for a custom
-coverage level.}
+coverage level. Conformal intervals apply only to model-inferred values;
+rows returned from the training-data dictionary receive \code{NA} bounds.}
 
-\item{method}{Character. Prediction method. Currently only \code{"XGBoost"}
-is supported.}
+\item{method}{Character. Prediction method. \code{"XGBoost"} (default),
+\code{"GPBoost"} (gradient boosting with nested taxonomic random effects;
+requires the \code{gpboost} package), or \code{"EntityEmbeddings"} (two-stage:
+taxonomy embeddings + XGBoost on embedding vectors).}
+
+\item{interval_method}{Character. How the conformal half-width is computed
+when \code{confidence_interval} is not \code{FALSE}. \code{"stratified"} (default) uses
+rank-specific calibration residuals, providing approximate conditional
+coverage per taxonomic rank. \code{"pooled"} applies a single quantile from all
+calibration residuals, providing the marginal conformal guarantee.}
 
 \item{include_taxonomy}{Logical. If \code{TRUE}, append the resolved taxonomy
 columns to the output. Default \code{FALSE}.}
@@ -33,36 +45,59 @@ tolerating misspellings and minor name variants. A \code{matched_name} column
 is appended to the output: it contains the originally entered name when a
 correction was applied or no GBIF match was found; \code{NA} when the name was
 already canonical. Default \code{FALSE} (exact name matching). Ignored when
-\code{species} is a \code{data.frame}.}
+\code{taxon} is a \code{data.frame}.}
+
+\item{include_source}{Logical. If \code{TRUE}, append a \code{source} column
+identifying the provenance of each returned mass value. For taxa returned
+directly from the training-data dictionary the value is the original
+source identifier (e.g., \code{"fishbase"}, \code{"Novak_unpubl"}). For
+model-inferred values it is \code{"tbmML_"} followed by the finest taxonomic
+rank present in the training data (e.g., \code{"tbmML_genus"} if the genus
+was seen during training; \code{"tbmML_order"} if only the order was seen).
+Unresolvable taxa receive \code{NA}. Default \code{FALSE}.}
+
+\item{lookup}{Logical. If \code{TRUE} (default), taxa found in the
+training-data dictionary are returned with their empirical mass and bypass
+the model. If \code{FALSE}, every resolved taxon is passed through the model
+specified by \code{method}.}
 }
 \value{
 A \code{data.frame} with at minimum columns \code{taxon} and \code{mass_g}
-(predicted body mass in grams).
+(body mass in grams).
 \itemize{
 \item When \code{confidence_interval != FALSE}: also \code{lower_bound}, \code{upper_bound},
-and \code{confidence}.
+and \code{confidence} (NA for dictionary-sourced rows).
 \item When \code{include_taxonomy = TRUE}: also \code{kingdom}, \code{phylum}, \code{class},
 \code{order}, \code{family}, \code{genus}, \code{species_resolved}.
 \item When \code{fuzzy_match_name = TRUE}: also \code{matched_name} (the originally
 entered name if corrected or unmatched; \code{NA} if no correction was
 needed).
+\item When \code{include_source = TRUE}: also \code{source}.
 \item Rows for unresolvable inputs contain \code{NA} for all numeric columns.
 }
 }
 \description{
 Predicts body mass (in grams) using the TaxonBodyMassML XGBoost model.
-When \code{species} is a character vector, taxonomy is resolved automatically.
+When \code{taxon} is a character vector, taxonomy is resolved automatically via
+GBIF and NCBI. For taxa whose species-level mass appears directly in the
+training data, the empirical value is returned without invoking the model.
 Pass a \code{data.frame} with pre-resolved taxonomy columns to skip lookup.
 }
 \examples{
 \dontrun{
-# Single species
+# Single taxon — returns empirical mass if in training data, else model
 TaxonBodyMassML::predict_mass("Homo sapiens")
 
-# Multiple species with 90\% confidence interval
+# Multiple taxa with 90\% confidence interval
 TaxonBodyMassML::predict_mass(
   c("Canis lupus", "Panthera leo"),
   confidence_interval = TRUE
+)
+
+# Show provenance of each returned value
+TaxonBodyMassML::predict_mass(
+  c("Nucella ostrina", "Nucella lima"),
+  include_source = TRUE
 )
 
 # Enable fuzzy name correction to tolerate misspellings

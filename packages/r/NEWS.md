@@ -1,3 +1,42 @@
+# TaxonBodyMassML 0.8.0
+
+## New features
+
+* `predict_mass()` gains an `interval_method` argument (default `"stratified"`).
+  `"stratified"` uses rank-specific conformal calibration residuals, providing
+  approximate rank-conditional coverage: genus-level queries receive narrower
+  intervals than family- or order-level queries. `"pooled"` reproduces the
+  previous behaviour (a single quantile from all pooled calibration residuals,
+  yielding the standard marginal coverage guarantee).
+* New artifact `calibration_by_rank.json` distributed alongside the model on
+  Hugging Face. Update checksums in `R/model.R` after running
+  `scripts/export_artifacts.py`.
+
+# TaxonBodyMassML 0.7.0
+
+## Breaking changes
+
+* `predict_mass()` first argument renamed from `species` to `taxon`. Code using
+  positional arguments is unaffected; code using `species = ...` as a keyword
+  argument must be updated to `taxon = ...`.
+
+## New features
+
+* `predict_mass()` now checks a built-in species dictionary derived from the
+  training data before invoking the model. When the queried taxon has a
+  directly measured mass in the training data, that value is returned unchanged
+  instead of a model prediction.
+* New `include_source` argument (default `FALSE`). When `TRUE`, a `source`
+  column is appended identifying the provenance of each returned mass value:
+  the original source identifier for dictionary-sourced values (e.g.,
+  `"fishbase"`, `"Novak_unpubl"`), or `"tbmML_<rank>"` for model-inferred
+  values, where `<rank>` is the finest taxonomic rank present in the training
+  data (e.g., `"tbmML_genus"`).
+* Conformal prediction intervals (CI columns) are `NA` for dictionary-sourced
+  rows since empirical values carry no model-based uncertainty estimate.
+* New artifact `lookup.json` distributed alongside the model on Hugging Face.
+  Update checksums in `R/model.R` after running `scripts/export_artifacts.py`.
+
 # TaxonBodyMassML 0.6.1
 
 ## Data and model

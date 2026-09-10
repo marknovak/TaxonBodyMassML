@@ -31,14 +31,15 @@ Run the export script from the repository root:
 python scripts/export_artifacts.py
 ```
 
-This reads the bundle from Step 1 and regenerates four files in `artifacts/`:
+This reads the bundle from Step 1 and regenerates five files in `artifacts/`:
 
 | File | Description |
 |---|---|
 | `model.ubj` | XGBoost model in binary UBJSON format (~2 GB) |
 | `calibration.json` | Sorted conformal prediction residuals |
 | `categories.json` | Taxonomy category lists in training-time code order |
-| `checksums.json` | SHA-256 hashes of the above three — the source of truth |
+| `lookup.json` | Species → `{mass_g, source}` dictionary from training data |
+| `checksums.json` | SHA-256 hashes of the above four — the source of truth |
 
 The script prints a sanity check comparing the rebuilt calibration quantile
 against the value stored in the bundle. If they differ by more than 1e-4 it
@@ -56,11 +57,11 @@ will raise an error — do not proceed until that is resolved.
 
 ## Step 3 — Upload to Hugging Face
 
-Install the CLI if needed, then upload all four artifact files:
+Install the CLI if needed, then upload all five artifact files:
 
 ```bash
-pip install "huggingface_hub[cli]"
-huggingface-cli login
+pip install huggingface_hub
+hf login
 hf upload marknovak/TaxonBodyMassML artifacts/ . --repo-type model
 ```
 
@@ -68,7 +69,7 @@ hf upload marknovak/TaxonBodyMassML artifacts/ . --repo-type model
 
 ## Step 4 — Update the Python package checksums
 
-Open `python/taxonbodymassml/_checksums.py` and replace the three SHA-256
+Open `python/taxonbodymassml/_checksums.py` and replace the four SHA-256
 values with the ones from `artifacts/checksums.json`:
 
 ```python
@@ -76,6 +77,7 @@ CHECKSUMS = {
     "model.ubj":        "<new sha256 from checksums.json>",
     "calibration.json": "<new sha256 from checksums.json>",
     "categories.json":  "<new sha256 from checksums.json>",
+    "lookup.json":      "<new sha256 from checksums.json>",
 }
 ```
 
@@ -87,14 +89,15 @@ come from `export_artifacts.py`, not that the file is literally off-limits.
 
 ## Step 5 — Update the R package checksums
 
-Open `r/R/model.R` and replace the three SHA-256 values in the `.CHECKSUMS`
-list (lines 16–20) with the same values from `artifacts/checksums.json`:
+Open `r/R/model.R` and replace the four SHA-256 values in the `.CHECKSUMS`
+list with the same values from `artifacts/checksums.json`:
 
 ```r
 .CHECKSUMS <- list(
   "model.ubj"        = "<new sha256 from checksums.json>",
   "calibration.json" = "<new sha256 from checksums.json>",
-  "categories.json"  = "<new sha256 from checksums.json>"
+  "categories.json"  = "<new sha256 from checksums.json>",
+  "lookup.json"      = "<new sha256 from checksums.json>"
 )
 ```
 
@@ -111,3 +114,68 @@ the new integrity constants. Both packages download the artifacts from Hugging
 Face on first use and verify them against these checksums, so users with a
 cached copy of the old model will re-download automatically when they upgrade
 the package.
+
+---
+
+## Updating the GPBoost or Entity Embeddings Models
+
+The GPBoost and Entity Embeddings models write their artifacts directly to `artifacts/`
+when their training scripts are run. They are not yet processed by `export_artifacts.py`
+and are not currently referenced by the Python or R packages.
+
+### Hyperparameter tuning (optional, before retraining)
+
+Before retraining, check whether updated hyperparameters improve cross-validation MAE:
+
+```bash
+python predictive_models/tune_hyperparameters.py --model gpboost
+python predictive_models/tune_hyperparameters.py --model ee
+```
+
+Review the output JSON in `predictive_models/results/` and, if `best_cv_mae` beats the
+current test MAE in `metrics_gpboost.json` or `metrics_ee.json`, apply the best params
+to the respective model file before running the training script. See
+`predictive_models/TUNING_PLAN.md` (Sections 5 and 6) for details.
+
+### GPBoost
+
+Run the training script from the repository root:
+
+```bash
+python predictive_models/gpboost_model.py
+```
+
+Artifacts written to `artifacts/`:
+
+| File | Description |
+|---|---|
+| `model_gpboost.json` | GPBoost model (tree parameters + GP random effects + BLUPs) |
+| `calibration_gpboost.json` | Pooled conformal prediction residuals |
+| `calibration_by_rank_gpboost.json` | Rank-stratified conformal residuals (genus → kingdom) |
+
+Metrics written to `predictive_models/results/metrics_gpboost.json`.
+
+### Entity Embeddings
+
+Run the training script from the repository root:
+
+```bash
+python predictive_models/entity_embeddings_model.py
+```
+
+Artifacts written to `artifacts/`:
+
+| File | Description |
+|---|---|
+| `embeddings.json` | Per-column embedding lookup tables `{col: {value: [floats]}}` |
+| `model_ee.ubj` | Stage 2 XGBoost in binary UBJSON format |
+| `calibration_ee.json` | Pooled conformal prediction residuals |
+| `calibration_by_rank_ee.json` | Rank-stratified conformal residuals (genus → kingdom) |
+
+Metrics written to `predictive_models/results/metrics_ee.json`.
+
+### Uploading to Hugging Face and updating checksums
+
+`export_artifacts.py` currently handles only the primary XGBoost artifacts. Upload
+GPBoost and EE artifacts to Hugging Face and update package checksums only when the
+Python and R packages add explicit support for these models.

@@ -4,10 +4,10 @@
 \alias{fuzzy_predict_mass}
 \title{Predict body mass for potentially misspelled species names}
 \usage{
-fuzzy_predict_mass(species, ...)
+fuzzy_predict_mass(taxon, ...)
 }
 \arguments{
-\item{species}{A character vector of scientific names (possibly misspelled).}
+\item{taxon}{A character vector of scientific names (possibly misspelled).}
 
 \item{...}{Additional arguments passed to \code{predict_mass()}.}
 }

@@ -72,6 +72,29 @@ TaxonBodyMassML::predict_mass("Canis lupus", confidence_interval = 0.80)
 TaxonBodyMassML::predict_mass("Panthera leo", include_taxonomy = TRUE)
 ```
 
+## Source Attribution
+
+Use `include_source = TRUE` to append a `source` column that records the
+provenance of each returned mass value. For species that appear directly in the
+training data, the column contains the original source identifier. For
+model-inferred values, the column is `"tbmML_"` followed by the finest
+taxonomic rank present in the training data.
+
+```{r source}
+TaxonBodyMassML::predict_mass(
+  c("Nucella ostrina",  # in training data — returns empirical mass
+    "Nucella lima"),    # not in training data — model infers from genus
+  include_source = TRUE
+)
+#>             taxon  mass_g       source
+#> 1 Nucella ostrina    0.70 Novak_unpubl
+#> 2     Nucella lima  X.XXX  tbmML_genus
+```
+
+Note that for species in the training data, `mass_g` is the empirical measured
+value (not a model prediction), and confidence interval columns (if requested)
+will be `NA`.
+
 ## Fuzzy Name Matching
 
 `predict_mass()` can correct species names via the GBIF species-match API

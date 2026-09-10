@@ -19,10 +19,28 @@ test_that(".resolve_ci_level errors on invalid values", {
   expect_error(TaxonBodyMassML:::.resolve_ci_level("bad"),"confidence_interval")
 })
 
+test_that(".resolve_interval_method returns valid methods unchanged", {
+  expect_equal(TaxonBodyMassML:::.resolve_interval_method("stratified"), "stratified")
+  expect_equal(TaxonBodyMassML:::.resolve_interval_method("pooled"),     "pooled")
+})
+
+test_that(".resolve_interval_method errors on invalid values", {
+  expect_error(TaxonBodyMassML:::.resolve_interval_method("marginal"), "interval_method")
+  expect_error(TaxonBodyMassML:::.resolve_interval_method(""),         "interval_method")
+  expect_error(TaxonBodyMassML:::.resolve_interval_method(TRUE),       "interval_method")
+})
+
 test_that("predict_mass() errors on unknown method", {
   expect_error(
     TaxonBodyMassML::predict_mass("Homo sapiens", method = "NotAModel"),
     "Unknown method"
+  )
+})
+
+test_that("predict_mass() errors on invalid interval_method", {
+  expect_error(
+    TaxonBodyMassML::predict_mass("Homo sapiens", interval_method = "marginal"),
+    "interval_method"
   )
 })
 
@@ -136,7 +154,7 @@ test_that("predict_mass() returns NA mass_g and warns for unresolvable species",
 
   expect_warning(
     result <- TaxonBodyMassML::predict_mass("Xyzzy_definitely_not_a_species_12345"),
-    "Could not resolve"
+    "No species could be resolved"
   )
   expect_equal(nrow(result), 1L)
   expect_true(is.na(result$mass_g))
@@ -182,4 +200,175 @@ test_that("predict_mass() with fuzzy_match_name: species NA and matched_name set
   expect_true(is.na(result$taxon))
   expect_equal(result$matched_name, "Xyzzy_definitely_not_a_species_12345")
   expect_true(is.na(result$mass_g))
+})
+
+# ---------------------------------------------------------------------------
+# Dictionary lookup and include_source
+# ---------------------------------------------------------------------------
+
+test_that("predict_mass() returns empirical mass for species in training data", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  # Nucella ostrina is in training data with mass_g = 0.7, source = "Novak_unpubl"
+  result <- TaxonBodyMassML::predict_mass("Nucella ostrina")
+  expect_equal(result$mass_g, 0.7)
+})
+
+test_that("predict_mass() with include_source returns source for dictionary hit", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  result <- TaxonBodyMassML::predict_mass("Nucella ostrina", include_source = TRUE)
+  expect_true("source" %in% names(result))
+  expect_equal(result$source, "Novak_unpubl")
+})
+
+test_that("predict_mass() dict hit with CI has NA bounds", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  result <- TaxonBodyMassML::predict_mass("Nucella ostrina",
+                                          confidence_interval = TRUE)
+  expect_true(all(c("lower_bound", "upper_bound", "confidence") %in% names(result)))
+  expect_true(is.na(result$lower_bound))
+  expect_true(is.na(result$upper_bound))
+  expect_true(is.na(result$confidence))
+})
+
+test_that("predict_mass() with include_source returns tbmML_genus for model-inferred with known genus", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  # Nucella lima is not in training data but Nucella genus is known
+  result <- TaxonBodyMassML::predict_mass("Nucella lima", include_source = TRUE)
+  expect_true("source" %in% names(result))
+  expect_equal(result$source, "tbmML_genus")
+})
+
+test_that("predict_mass() with include_source returns NA source for unresolvable taxon", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  suppressWarnings(
+    result <- TaxonBodyMassML::predict_mass("Xyzzy_definitely_not_a_species_12345",
+                                            include_source = TRUE)
+  )
+  expect_true("source" %in% names(result))
+  expect_true(is.na(result$source))
+})
+
+test_that("predict_mass() preserves order with mixed dict/model/unresolved rows", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  sp <- c("Nucella ostrina",                    # dict hit
+          "Canis lupus",                         # model-inferred
+          "Xyzzy_definitely_not_a_species_12345") # unresolvable
+  suppressWarnings(result <- TaxonBodyMassML::predict_mass(sp, include_source = TRUE))
+  expect_equal(nrow(result), 3L)
+  expect_equal(result$taxon[1L], "Nucella ostrina")
+  expect_equal(result$mass_g[1L], 0.7)
+  expect_equal(result$source[1L], "Novak_unpubl")
+  expect_false(is.na(result$mass_g[2L]))
+  expect_true(startsWith(result$source[2L], "tbmML_"))
+  expect_true(is.na(result$mass_g[3L]))
+  expect_true(is.na(result$source[3L]))
+})
+
+# ---------------------------------------------------------------------------
+# lookup parameter
+# ---------------------------------------------------------------------------
+
+test_that("predict_mass() with lookup = FALSE routes dict species through model", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  # Nucella ostrina is in training data (mass_g = 0.7); with lookup = FALSE
+  # it should be passed through the model and return a different value.
+  result <- TaxonBodyMassML::predict_mass("Nucella ostrina", lookup = FALSE)
+  expect_false(isTRUE(all.equal(result$mass_g, 0.7)))
+})
+
+test_that("predict_mass() with lookup = FALSE, include_source returns tbmML_ prefix", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  result <- TaxonBodyMassML::predict_mass("Nucella ostrina",
+                                          lookup = FALSE,
+                                          include_source = TRUE)
+  expect_true(startsWith(result$source, "tbmML_"))
+})
+
+# ---------------------------------------------------------------------------
+# interval_method
+# ---------------------------------------------------------------------------
+
+test_that("predict_mass() stratified interval returns finite bounds for model-inferred taxon", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  result <- TaxonBodyMassML::predict_mass(
+    "Nucella lima",
+    confidence_interval = TRUE,
+    interval_method = "stratified"
+  )
+  expect_true(all(c("lower_bound", "upper_bound", "confidence") %in% names(result)))
+  expect_true(is.finite(result$lower_bound))
+  expect_true(is.finite(result$upper_bound))
+  expect_lt(result$lower_bound, result$mass_g)
+  expect_gt(result$upper_bound, result$mass_g)
+})
+
+test_that("predict_mass() pooled interval returns finite bounds for model-inferred taxon", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  result <- TaxonBodyMassML::predict_mass(
+    "Nucella lima",
+    confidence_interval = TRUE,
+    interval_method = "pooled"
+  )
+  expect_true(is.finite(result$lower_bound))
+  expect_true(is.finite(result$upper_bound))
+  expect_lt(result$lower_bound, result$mass_g)
+  expect_gt(result$upper_bound, result$mass_g)
+})
+
+test_that("predict_mass() stratified and pooled intervals differ for model-inferred taxon", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  r_strat <- TaxonBodyMassML::predict_mass(
+    "Nucella lima", confidence_interval = TRUE, interval_method = "stratified"
+  )
+  r_pool  <- TaxonBodyMassML::predict_mass(
+    "Nucella lima", confidence_interval = TRUE, interval_method = "pooled"
+  )
+  width_strat <- r_strat$upper_bound - r_strat$lower_bound
+  width_pool  <- r_pool$upper_bound  - r_pool$lower_bound
+  expect_false(isTRUE(all.equal(width_strat, width_pool)))
+})
+
+test_that("predict_mass() dict hit has NA bounds regardless of interval_method", {
+  testthat::skip_if(!TaxonBodyMassML:::.artifacts_cached(),
+                    "Model artifacts not cached; skipping integration test.")
+  testthat::skip_if_offline()
+
+  r_strat <- TaxonBodyMassML::predict_mass(
+    "Nucella ostrina", confidence_interval = TRUE, interval_method = "stratified"
+  )
+  expect_true(is.na(r_strat$lower_bound))
+  expect_true(is.na(r_strat$upper_bound))
 })
