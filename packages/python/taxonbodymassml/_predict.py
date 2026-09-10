@@ -447,7 +447,6 @@ def predict_mass(
         raise ValueError(f"Unknown method {method!r}. Available: {list(_METHODS)}")
     interval_method = _resolve_interval_method(interval_method)
     level = _resolve_ci_level(confidence_interval)
-    _ensure_artifacts()
 
     # ---- Input handling ------------------------------------------------
     if isinstance(taxon, pd.DataFrame):

@@ -45,9 +45,11 @@ def main() -> None:
     if result.returncode != 0:
         sys.exit(f"Upload failed (exit {result.returncode}). Aborting tag creation.")
 
-    print(f"Creating HuggingFace tag {tag!r} ...")
-    HfApi().create_tag(HF_REPO_ID, tag=tag, repo_type="model", exist_ok=True)
-    print(f"Done. Artifacts published at {HF_REPO_ID}@{tag}")
+    api = HfApi()
+    for tag in (f"r-v{version}", f"py-v{version}"):
+        print(f"Creating HuggingFace tag {tag!r} ...")
+        api.create_tag(HF_REPO_ID, tag=tag, repo_type="model", exist_ok=True)
+    print(f"Done. Artifacts published at {HF_REPO_ID} (r-v{version}, py-v{version})")
 
 
 if __name__ == "__main__":
